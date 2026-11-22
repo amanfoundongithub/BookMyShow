@@ -55,6 +55,8 @@ start_api "gateway" "$ROOT_DIR/gateway" "${GATEWAY_PORT:-8000}"
 start_api "catalog" "$ROOT_DIR/services/catalog" "${CATALOG_PORT:-8001}"
 start_api "booking" "$ROOT_DIR/services/booking" "${BOOKING_PORT:-8002}"
 start_api "payment" "$ROOT_DIR/services/payment" "${PAYMENT_PORT:-8003}"
+start_api "cinema" "$ROOT_DIR/services/cinema" "${CINEMA_SERVICE_PORT:-8005}"
+start_api "hall" "$ROOT_DIR/services/hall" "${HALL_SERVICE_PORT:-8006}"
 
 echo "Starting notification worker (RabbitMQ consumer)"
 (
