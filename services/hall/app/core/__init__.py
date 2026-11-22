@@ -1,0 +1,1 @@
+"""Core configuration and database helpers for Hall Service."""
