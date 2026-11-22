@@ -11,8 +11,6 @@ async def connect_mongo() -> None:
     db = get_database()
     await db.shows.create_index([("cinema_id", 1), ("start_time", 1)])
     await db.shows.create_index([("movie_id", 1), ("start_time", 1)])
-    await db.halls.create_index([("cinema_id", 1)])
-    await db.cinemas.create_index([("city_id", 1)])
 
 
 async def close_mongo() -> None:

@@ -1,6 +1,5 @@
 from datetime import datetime
 from pydantic import BaseModel
-from app.models.domain import HallLayout
 
 
 class CityResponse(BaseModel):
@@ -41,11 +40,3 @@ class CreateShowRequest(BaseModel):
     language: str
     format: str
     pricing: dict[str, float]
-
-
-class HallLayoutResponse(BaseModel):
-    hall_id: str
-    cinema_id: str
-    name: str
-    total_seats: int
-    layout: HallLayout

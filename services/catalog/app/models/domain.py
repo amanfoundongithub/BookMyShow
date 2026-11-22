@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Literal
 from pydantic import BaseModel, Field
 
 
@@ -8,36 +7,6 @@ class CityDoc(BaseModel):
     name: str
     state: str
     country: str = "India"
-
-
-class CinemaDoc(BaseModel):
-    id: str = Field(alias="_id")
-    city_id: str
-    name: str
-    address: str
-
-
-class SeatSlot(BaseModel):
-    seat_number: int | None = None
-    type: Literal["STANDARD", "AISLE", "WHEELCHAIR"] = "STANDARD"
-
-
-class HallRow(BaseModel):
-    row_label: str
-    tier: str
-    seats: list[SeatSlot]
-
-
-class HallLayout(BaseModel):
-    rows: list[HallRow]
-
-
-class HallDoc(BaseModel):
-    id: str = Field(alias="_id")
-    cinema_id: str
-    name: str
-    total_seats: int
-    layout: HallLayout
 
 
 class MovieDoc(BaseModel):

@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     redis_db: int = 0
     catalog_cache_ttl_seconds: int = 120
 
+    cinema_service_url: str = Field(
+        default="http://localhost:8005", validation_alias="CINEMA_SERVICE_URL"
+    )
+    hall_service_url: str = Field(
+        default="http://localhost:8006", validation_alias="HALL_SERVICE_URL"
+    )
+
     @property
     def mongo_uri(self) -> str:
         return self.mongo_connection_uri

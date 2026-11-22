@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
 from uuid import uuid4
 from fastapi import FastAPI, Request
+import httpx
 from bms_common.headers import CORRELATION_ID_HEADER
 from bms_common.logging import configure_logging, correlation_id_var
 from app.core.cache import close_redis, connect_redis
 from app.core.config import get_settings
 from app.core.db import close_mongo, connect_mongo
-from app.routers import cities, halls, movies, health, shows
+from app.routers import cities, health, movies, shows
 
 settings = get_settings()
 configure_logging(service_name=settings.service_name, level=settings.log_level)
@@ -16,9 +17,11 @@ configure_logging(service_name=settings.service_name, level=settings.log_level)
 async def lifespan(_app: FastAPI):
     await connect_mongo()
     await connect_redis()
+    _app.state.http_client = httpx.AsyncClient(timeout=10.0)
     try:
         yield
     finally:
+        await _app.state.http_client.aclose()
         await close_redis()
         await close_mongo()
 
@@ -42,4 +45,3 @@ app.include_router(health.router)
 app.include_router(cities.router)
 app.include_router(movies.router)
 app.include_router(shows.router)
-app.include_router(halls.router)
