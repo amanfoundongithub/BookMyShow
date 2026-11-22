@@ -8,6 +8,7 @@ import {
   ReleaseBookingRequest,
   ReleaseBookingResponse,
   SeatMapResponse,
+  BookingRecord
 } from '../../models/bms.models';
 
 @Injectable({ providedIn: 'root' })
@@ -33,4 +34,10 @@ export class BookingService {
   releaseBooking(payload: ReleaseBookingRequest): Observable<ReleaseBookingResponse> {
     return this.http.post<ReleaseBookingResponse>(`${this.baseUrl}/release`, payload);
   }
+
+  getUserBookings(userId: string): Observable<BookingRecord[]> {
+  return this.http.get<BookingRecord[]>(`${this.baseUrl}`, {
+    params: { user_id: userId },
+  });
+}
 }
