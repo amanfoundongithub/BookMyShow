@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     service_port: int = 8002
 
     catalog_service_url: str = "http://localhost:8001"
+    hall_service_url: str = Field(
+        default="http://localhost:8006", validation_alias="HALL_SERVICE_URL"
+    )
     seat_hold_ttl_seconds: int = 600
 
     mongo_connection_uri: str = Field(validation_alias="MONGO_URI")

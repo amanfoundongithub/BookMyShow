@@ -30,7 +30,13 @@ def get_ws_manager(request: Request) -> ShowWsManager:
 
 
 def get_http_client(request: Request) -> httpx.AsyncClient:
-    return request.app.state.http_client
+    client: httpx.AsyncClient = request.app.state.http_client
+    corr_id = request.headers.get(CORRELATION_ID_HEADER) or getattr(
+        request.state, "correlation_id", None
+    )
+    if corr_id:
+        client.headers[CORRELATION_ID_HEADER] = corr_id
+    return client
 
 
 def _build_service(request: Request, db) -> BookingService:

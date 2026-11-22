@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.core.db import close_mongo, connect_mongo, get_database
 from app.core.mq import close_mq, connect_mq
 from app.core.redis import close_redis, connect_redis, get_redis
+from app.redis_lock import SeatLockManager
 from app.routers import bookings, health, ws
 from app.services.event_handler import BookingEventHandler
 from app.ws_manager import ShowWsManager
@@ -27,13 +28,13 @@ async def lifespan(app: FastAPI):
     ws_manager = ShowWsManager(redis=redis)
     await ws_manager.start()
     app.state.ws_manager = ws_manager
-    app.state.http_client = httpx.AsyncClient(timeout=5.0)
+    app.state.http_client = httpx.AsyncClient(timeout=10.0)
 
-    event_handler = BookingEventHandler(db=db, lock_manager=None, ws_manager=ws_manager)  # type: ignore[arg-type]
-    from app.redis_lock import SeatLockManager
-
-    event_handler.lock_manager = SeatLockManager(
+    lock_manager = SeatLockManager(
         redis=redis, ttl_seconds=settings.seat_hold_ttl_seconds
+    )
+    event_handler = BookingEventHandler(
+        db=db, lock_manager=lock_manager, ws_manager=ws_manager
     )
 
     await connect_mq(on_payment_event=event_handler.handle_payment_event)

@@ -86,10 +86,18 @@ class BookingService:
     async def get_seat_map(self, show_id: str, hall_id: str) -> SeatMapResponse:
         layout_data: dict = {"hall_id": hall_id, "layout": {"rows": []}}
         if self.http_client is not None:
-            url = f"{self.settings.catalog_service_url}/api/v1/catalog/halls/{hall_id}/layout"
-            resp = await self.http_client.get(url)
-            resp.raise_for_status()
-            layout_data = resp.json()
+            hall_url = f"{self.settings.hall_service_url.rstrip('/')}/api/v1/halls/{hall_id}/layout"
+            try:
+                resp = await self.http_client.get(hall_url)
+                resp.raise_for_status()
+                layout_data = resp.json()
+            except httpx.HTTPError:
+                fallback_url = (
+                    f"{self.settings.catalog_service_url.rstrip('/')}/api/v1/catalog/halls/{hall_id}/layout"
+                )
+                resp = await self.http_client.get(fallback_url)
+                resp.raise_for_status()
+                layout_data = resp.json()
 
         seat_ids = self._extract_seat_ids(layout_data)
         states = await self.lock_manager.get_show_seat_states(show_id, seat_ids)
