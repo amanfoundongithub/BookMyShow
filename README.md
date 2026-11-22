@@ -97,8 +97,11 @@ The HTTP APIs expose interactive documentation at
 `http://localhost:8002/docs` (booking), `http://localhost:8003/docs` (payment),
 and `http://localhost:8004/docs` (user). Register and log in through
 `POST /api/v1/auth/register` and `POST /api/v1/auth/login`; use the returned
-Bearer token for protected routes such as `GET /api/v1/users/me`. The
-notification worker is a background consumer and does not expose an HTTP API.
+Bearer token for protected routes such as `GET /api/v1/users/me` and
+`GET /api/v1/bookings?user_id=<user-id>`. The gateway accepts the booking
+collection URL with or without a trailing slash and forwards the authenticated
+user identity to the booking service. The notification worker is a background
+consumer and does not expose an HTTP API.
 
 ## License
 
