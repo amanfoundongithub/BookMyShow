@@ -1,0 +1,19 @@
+.countdown-box {
+  @apply inline-flex items-center gap-2.5 px-3.5 py-2 rounded-lg border text-sm font-medium bg-amber-950/50 border-amber-700/70 text-amber-200;
+}
+
+.countdown-box--urgent {
+  @apply bg-rose-950/60 border-rose-600 text-rose-200;
+}
+
+.countdown-box--expired {
+  @apply bg-slate-900 border-slate-700 text-slate-400;
+}
+
+.countdown-label {
+  @apply text-xs uppercase tracking-wider opacity-80;
+}
+
+.countdown-clock {
+  @apply font-mono text-base font-bold tabular-nums;
+}
