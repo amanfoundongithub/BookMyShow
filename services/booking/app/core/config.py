@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     service_name: str = "booking-service"
     service_port: int = 8002
 
-    catalog_service_url: str = "http://catalog-service:8001"
+    catalog_service_url: str = "http://localhost:8001"
     seat_hold_ttl_seconds: int = 600
 
     mongo_connection_uri: str = Field(validation_alias="MONGO_URI")

@@ -3,7 +3,12 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
 async def seed_catalog(db: AsyncIOMotorDatabase) -> None:
-    now = datetime.now(timezone.utc).replace(hour=18, minute=30, second=0, microsecond=0)
+    current_time = datetime.now(timezone.utc)
+    show_start = current_time.replace(
+        hour=18, minute=30, second=0, microsecond=0
+    )
+    if show_start <= current_time:
+        show_start += timedelta(days=1)
 
     cities = [
         {"_id": "city_hyd", "name": "Hyderabad", "state": "Telangana", "country": "India"},
@@ -68,8 +73,8 @@ async def seed_catalog(db: AsyncIOMotorDatabase) -> None:
         "movie_id": "mov_inception",
         "cinema_id": "cin_pvr_01",
         "hall_id": "hall_audi_2",
-        "start_time": now,
-        "end_time": now + timedelta(minutes=148),
+        "start_time": show_start,
+        "end_time": show_start + timedelta(minutes=148),
         "language": "English",
         "format": "IMAX 2D",
         "pricing": {"RECLINER": 450.0, "PRIME": 280.0, "CLASSIC": 180.0},
