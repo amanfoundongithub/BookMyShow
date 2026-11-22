@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -19,7 +19,8 @@ export class ShowSelectionComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly cities = signal<City[]>([]);
-  readonly selectedCityId = signal<string>('city_hyd');
+  readonly selectedState = signal<string>('');
+  readonly selectedCityId = signal<string>('');
   readonly movies = signal<Movie[]>([]);
   readonly selectedMovie = signal<Movie | null>(null);
   readonly selectedDate = signal<string>(new Date().toISOString().slice(0, 10));
@@ -29,15 +30,48 @@ export class ShowSelectionComponent implements OnInit {
   readonly loadingShows = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
+  readonly states = computed(() => {
+    const unique = new Set(
+      this.cities()
+        .map((c) => c.state?.trim())
+        .filter((s): s is string => Boolean(s))
+    );
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  });
+
+  readonly citiesInSelectedState = computed(() => {
+    const state = this.selectedState();
+    if (!state) return [];
+    return this.cities().filter((c) => c.state === state);
+  });
+
+  readonly selectedCity = computed(() => {
+    const cityId = this.selectedCityId();
+    if (!cityId) return null;
+    return this.cities().find((c) => c.id === cityId) ?? null;
+  });
+
   ngOnInit(): void {
     this.loadCities();
+  }
+
+  onStateChange(state: string): void {
+    this.selectedState.set(state);
+    this.selectedCityId.set('');
+    this.selectedMovie.set(null);
+    this.movies.set([]);
+    this.shows.set([]);
   }
 
   onCityChange(cityId: string): void {
     this.selectedCityId.set(cityId);
     this.selectedMovie.set(null);
     this.shows.set([]);
-    this.loadMovies(cityId);
+    if (cityId) {
+      this.loadMovies(cityId);
+    } else {
+      this.movies.set([]);
+    }
   }
 
   selectMovie(movie: Movie): void {
@@ -70,10 +104,14 @@ export class ShowSelectionComponent implements OnInit {
     this.catalogService.getCities().subscribe({
       next: (cities) => {
         this.cities.set(cities);
-        const preferred =
-          cities.find((c) => c.id === this.selectedCityId())?.id ?? cities[0]?.id ?? 'city_hyd';
-        this.selectedCityId.set(preferred);
-        this.loadMovies(preferred);
+        const preferredCity =
+          cities.find((c) => c.id === 'city_hyd') ?? cities[0] ?? null;
+
+        if (preferredCity) {
+          this.selectedState.set(preferredCity.state);
+          this.selectedCityId.set(preferredCity.id);
+          this.loadMovies(preferredCity.id);
+        }
       },
       error: () => {
         this.errorMessage.set('Failed to load cities from Catalog Service.');

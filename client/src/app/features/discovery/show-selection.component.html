@@ -1,18 +1,38 @@
 <div class="selection-page">
-  <!-- Top Bar: City Selector & Auth Status -->
+  <!-- Top Bar: Cascading State -> City Selector & Auth Status -->
   <section class="toolbar-card">
-    <div class="city-group">
-      <label for="citySelect" class="field-label">City</label>
-      <select
-        id="citySelect"
-        class="control-input city-select"
-        [ngModel]="selectedCityId()"
-        (ngModelChange)="onCityChange($event)"
-      >
-        @for (city of cities(); track city.id) {
-          <option [value]="city.id">{{ city.name }}, {{ city.state }}</option>
-        }
-      </select>
+    <div class="location-controls">
+      <div class="selector-group">
+        <label for="stateSelect" class="field-label">1. State</label>
+        <select
+          id="stateSelect"
+          class="control-input location-select"
+          [ngModel]="selectedState()"
+          (ngModelChange)="onStateChange($event)"
+        >
+          <option value="">Select a state...</option>
+          @for (st of states(); track st) {
+            <option [value]="st">{{ st }}</option>
+          }
+        </select>
+      </div>
+
+      @if (selectedState()) {
+        <div class="selector-group">
+          <label for="citySelect" class="field-label">2. City</label>
+          <select
+            id="citySelect"
+            class="control-input location-select"
+            [ngModel]="selectedCityId()"
+            (ngModelChange)="onCityChange($event)"
+          >
+            <option value="">Select a city...</option>
+            @for (city of citiesInSelectedState(); track city.id) {
+              <option [value]="city.id">{{ city.name }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
     @if (!authService.isAuthenticated()) {
@@ -31,12 +51,33 @@
 
   <!-- Movies List -->
   <section class="movies-section">
-    <h2 class="section-heading">Now Showing</h2>
+    <div class="section-header">
+      <div>
+        <h2 class="section-heading">Now Showing</h2>
+        @if (selectedCity()) {
+          <p class="section-caption">
+            Showing movies in <span class="highlight-text">{{ selectedCity()!.name }}, {{ selectedCity()!.state }}</span>
+          </p>
+        }
+      </div>
 
-    @if (loadingMovies()) {
-      <p class="status-text">Loading movies...</p>
+      @if (movies().length > 0) {
+        <span class="count-pill">{{ movies().length }} {{ movies().length === 1 ? 'movie' : 'movies' }}</span>
+      }
+    </div>
+
+    @if (!selectedState()) {
+      <div class="empty-state">
+        Select a <span class="highlight-text">state</span> above to choose a city and browse movies.
+      </div>
+    } @else if (!selectedCityId()) {
+      <div class="empty-state">
+        Now pick a <span class="highlight-text">city</span> in {{ selectedState() }} to view available movies.
+      </div>
+    } @else if (loadingMovies()) {
+      <div class="empty-state">Loading movies...</div>
     } @else if (movies().length === 0) {
-      <p class="status-text">No movies with upcoming shows in this city.</p>
+      <div class="empty-state">No movies with upcoming shows in this city.</div>
     } @else {
       <div class="movies-grid">
         @for (movie of movies(); track movie.id) {
@@ -73,7 +114,7 @@
       <div class="showtimes-header">
         <div>
           <h2 class="panel-heading">Showtimes — {{ selectedMovie()!.title }}</h2>
-          <p class="panel-subtitle">Select a show to open the real-time seat matrix</p>
+          <p class="panel-subtitle">Select a showtime to open the real-time seat matrix</p>
         </div>
 
         <div class="date-group">
@@ -89,14 +130,14 @@
       </div>
 
       @if (loadingShows()) {
-        <p class="status-text">Loading showtimes...</p>
+        <div class="empty-state">Loading showtimes...</div>
       } @else if (shows().length === 0) {
-        <p class="status-text">No shows scheduled for {{ selectedDate() }}.</p>
+        <div class="empty-state">No shows scheduled for {{ selectedDate() }}.</div>
       } @else {
         <div class="shows-grid">
           @for (show of shows(); track show.id) {
             <div class="show-card">
-              <div>
+              <div class="space-y-2.5">
                 <div class="show-card__top">
                   <span class="show-time">{{ show.start_time | date: 'shortTime' }}</span>
                   <span class="show-format">{{ show.format }} • {{ show.language }}</span>
