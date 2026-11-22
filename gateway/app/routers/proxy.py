@@ -167,7 +167,6 @@ async def proxy_auth(request: Request, path: str) -> Response:
 async def proxy_users(request: Request, path: str) -> Response:
     settings = get_settings()
     normalized = path.strip("/")
-    # Admin-only user creation when hitting /api/v1/users directly
     allowed_roles = {"ADMIN"} if normalized == "" and request.method == "POST" else None
     return await _proxy_http(
         request=request,
@@ -176,6 +175,42 @@ async def proxy_users(request: Request, path: str) -> Response:
         require_auth=True,
         allowed_roles=allowed_roles,
         forward_authorization=True,
+    )
+
+
+@router.api_route(
+    "/api/v1/cinemas",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+@router.api_route(
+    "/api/v1/cinemas/",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_cinemas_root(request: Request) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.cinema_service_url,
+        path="/api/v1/cinemas",
+        require_auth=is_write,
+        allowed_roles={"ADMIN", "CINEMA"} if is_write else None,
+    )
+
+
+@router.api_route(
+    "/api/v1/cinemas/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_cinemas(request: Request, path: str) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.cinema_service_url,
+        path=f"/api/v1/cinemas/{path}",
+        require_auth=is_write,
+        allowed_roles={"ADMIN", "CINEMA"} if is_write else None,
     )
 
 
@@ -233,7 +268,6 @@ async def proxy_bookings(request: Request, path: str) -> Response:
 )
 async def proxy_payments(request: Request, path: str) -> Response:
     settings = get_settings()
-    # Webhook callbacks come from external gateway; intent creation requires auth
     require_auth = not path.startswith("webhook")
     return await _proxy_http(
         request=request,
