@@ -1,0 +1,24 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="header-inner">
+      <a routerLink="/" class="brand-link">
+        <span class="brand-badge">BMS</span>
+        <span class="brand-title">BookMyShow Clone</span>
+      </a>
+
+      <div class="session-pill">
+        <span class="session-user">{{ authService.userId() }}</span>
+        <span
+          class="token-indicator"
+          [class.token-indicator--set]="!!authService.token()"
+        >
+          {{ authService.token() ? 'JWT Ready' : 'No JWT' }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <router-outlet />
+  </main>
+</div>

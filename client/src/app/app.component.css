@@ -1,0 +1,47 @@
+.app-shell {
+  @apply min-h-screen bg-slate-950 text-slate-100 flex flex-col;
+}
+
+.app-header {
+  @apply sticky top-0 z-20 bg-slate-900/90 backdrop-blur border-b border-slate-800;
+}
+
+.header-inner {
+  @apply max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4;
+}
+
+.brand-link {
+  @apply inline-flex items-center gap-2.5 text-white font-bold tracking-tight;
+}
+
+.brand-badge {
+  @apply px-2 py-0.5 rounded bg-rose-600 text-white text-xs font-extrabold;
+}
+
+.brand-title {
+  @apply text-base;
+}
+
+.session-pill {
+  @apply flex items-center gap-2.5 text-xs;
+}
+
+.session-user {
+  @apply font-mono px-2 py-1 rounded bg-slate-800 text-slate-200;
+}
+
+.token-indicator {
+  @apply px-2 py-1 rounded border;
+}
+
+.token-indicator--set {
+  @apply bg-emerald-950/60 border-emerald-700/70 text-emerald-300;
+}
+
+.token-indicator:not(.token-indicator--set) {
+  @apply bg-amber-950/50 border-amber-700/60 text-amber-300;
+}
+
+.app-main {
+  @apply flex-1;
+}
