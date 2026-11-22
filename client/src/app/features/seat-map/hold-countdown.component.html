@@ -1,0 +1,10 @@
+@if (holdExpiresAt()) {
+  <div
+    class="countdown-box"
+    [class.countdown-box--urgent]="isUrgent()"
+    [class.countdown-box--expired]="remainingSeconds() <= 0"
+  >
+    <span class="countdown-label">Hold expires in</span>
+    <span class="countdown-clock">{{ formattedTime() }}</span>
+  </div>
+}
