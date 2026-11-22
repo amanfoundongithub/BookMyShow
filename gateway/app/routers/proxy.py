@@ -8,6 +8,9 @@ from app.core.security import decode_bearer_token
 
 router = APIRouter(tags=["gateway"])
 
+USER_ROLE_HEADER = "X-User-Role"
+CINEMA_IDS_HEADER = "X-Cinema-Ids"
+
 _HOP_BY_HOP_HEADERS = {
     "connection",
     "keep-alive",
@@ -25,6 +28,8 @@ def _forward_headers(
     request: Request,
     corr_id: str | None,
     user_id: str | None = None,
+    user_role: str | None = None,
+    cinema_ids: list[str] | None = None,
     forward_authorization: bool = False,
 ) -> dict[str, str]:
     headers: dict[str, str] = {}
@@ -44,7 +49,27 @@ def _forward_headers(
     if user_id:
         headers[USER_ID_HEADER] = user_id
 
+    if user_role:
+        headers[USER_ROLE_HEADER] = user_role
+
+    if cinema_ids:
+        headers[CINEMA_IDS_HEADER] = ",".join(cinema_ids)
+
     return headers
+
+
+def _enforce_allowed_roles(
+    role: str,
+    allowed_roles: set[str] | None,
+    corr_id: str | None,
+) -> None:
+    if allowed_roles and role not in allowed_roles:
+        headers = {CORRELATION_ID_HEADER: corr_id} if corr_id else None
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Role '{role}' is not authorized to access this resource",
+            headers=headers,
+        )
 
 
 async def _proxy_http(
@@ -52,16 +77,24 @@ async def _proxy_http(
     target_base_url: str,
     path: str,
     require_auth: bool,
+    allowed_roles: set[str] | None = None,
     forward_authorization: bool = False,
 ) -> Response:
     corr_id = request.headers.get(CORRELATION_ID_HEADER) or getattr(
         request.state, "correlation_id", None
     )
     user_id: str | None = None
+    user_role: str | None = None
+    cinema_ids: list[str] | None = None
 
     if require_auth:
         claims = decode_bearer_token(request.headers.get("Authorization"))
         user_id = str(claims["sub"])
+        user_role = str(claims.get("role") or "USER")
+        raw_cinema_ids = claims.get("cinema_ids")
+        if isinstance(raw_cinema_ids, list):
+            cinema_ids = [str(c) for c in raw_cinema_ids if c]
+        _enforce_allowed_roles(role=user_role, allowed_roles=allowed_roles, corr_id=corr_id)
 
     query_str = request.url.query
     url = f"{target_base_url.rstrip('/')}{path}"
@@ -73,6 +106,8 @@ async def _proxy_http(
         request=request,
         corr_id=corr_id,
         user_id=user_id,
+        user_role=user_role,
+        cinema_ids=cinema_ids,
         forward_authorization=forward_authorization,
     )
 
@@ -131,11 +166,15 @@ async def proxy_auth(request: Request, path: str) -> Response:
 )
 async def proxy_users(request: Request, path: str) -> Response:
     settings = get_settings()
+    normalized = path.strip("/")
+    # Admin-only user creation when hitting /api/v1/users directly
+    allowed_roles = {"ADMIN"} if normalized == "" and request.method == "POST" else None
     return await _proxy_http(
         request=request,
         target_base_url=settings.user_service_url,
         path=f"/api/v1/users/{path}",
         require_auth=True,
+        allowed_roles=allowed_roles,
         forward_authorization=True,
     )
 
@@ -146,13 +185,13 @@ async def proxy_users(request: Request, path: str) -> Response:
 )
 async def proxy_catalog(request: Request, path: str) -> Response:
     settings = get_settings()
-    # Allow public GET discovery; require auth for write operations
-    require_auth = request.method != "GET"
+    is_write = request.method != "GET"
     return await _proxy_http(
         request=request,
         target_base_url=settings.catalog_service_url,
         path=f"/api/v1/catalog/{path}",
-        require_auth=require_auth,
+        require_auth=is_write,
+        allowed_roles={"ADMIN", "CINEMA"} if is_write else None,
     )
 
 

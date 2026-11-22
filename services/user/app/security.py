@@ -3,6 +3,7 @@ from typing import Any
 import jwt
 from pwdlib import PasswordHash
 from .config import settings
+from .models import UserRole
 
 _password_hash = PasswordHash.recommended()
 
@@ -15,13 +16,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return _password_hash.verify(plain_password, hashed_password)
 
 
-def create_access_token(*, user_id: str, email: str, role: str = "USER") -> str:
+def create_access_token(
+    *,
+    user_id: str,
+    email: str,
+    role: UserRole = "USER",
+    cinema_ids: list[str] | None = None,
+) -> str:
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
         "sub": user_id,
         "user_id": user_id,
         "email": email,
         "role": role,
+        "cinema_ids": cinema_ids or [],
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=settings.JWT_EXPIRES_MINUTES)).timestamp()),
     }
