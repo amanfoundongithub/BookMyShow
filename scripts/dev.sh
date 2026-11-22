@@ -50,6 +50,7 @@ start_api() {
     PIDS+=("$!")
 }
 
+start_api "user" "$ROOT_DIR/services/user" "${USER_SERVICE_PORT:-8004}"
 start_api "gateway" "$ROOT_DIR/gateway" "${GATEWAY_PORT:-8000}"
 start_api "catalog" "$ROOT_DIR/services/catalog" "${CATALOG_PORT:-8001}"
 start_api "booking" "$ROOT_DIR/services/booking" "${BOOKING_PORT:-8002}"

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     catalog_service_url: str = "http://localhost:8001"
     booking_service_url: str = "http://localhost:8002"
     payment_service_url: str = "http://localhost:8003"
+    user_service_url: str = "http://localhost:8004"
     cors_origins: list[str] = [
         "http://localhost:4200",
         "http://127.0.0.1:4200",

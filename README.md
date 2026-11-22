@@ -10,17 +10,18 @@ and event-driven notification handling.
 | --- | ---: | --- |
 | Angular client | 4200 | Movie discovery, seat selection, and checkout |
 | API gateway | 8000 | HTTP/WebSocket proxy, JWT validation, and CORS |
+| User service | 8004 | Account registration, login, and profile lookup |
 | Catalog service | 8001 | Cities, cinemas, halls, movies, and showtimes |
 | Booking service | 8002 | Seat maps, temporary seat holds, and booking state |
 | Payment service | 8003 | Payment intents and webhook processing using a mock gateway |
 | Notification worker | — | Consumes booking/payment events from RabbitMQ |
 
-The gateway routes client requests to the services. Catalog, booking, and payment
-data use the shared MongoDB database configured by `MONGO_DB_NAME` (default:
-`BookMyShow`). The catalog stores cities, cinemas, halls, movies, and shows;
-booking and payment store bookings and transactions. Redis backs catalog caching
-and seat holds. RabbitMQ carries booking/payment events to the notification
-worker.
+The gateway routes client requests to the services. User, catalog, booking, and
+payment data use the shared MongoDB database configured by `MONGO_DB_NAME`
+(default: `BookMyShow`). The user service stores accounts; the catalog stores
+cities, cinemas, halls, movies, and shows; booking and payment store bookings
+and transactions. Redis backs catalog caching and seat holds. RabbitMQ carries
+booking/payment events to the notification worker.
 
 ## Requirements
 
@@ -42,7 +43,8 @@ worker.
      -r services/catalog/requirements.txt \
      -r services/booking/requirements.txt \
      -r services/payment/requirements.txt \
-     -r services/notification/requirements.txt
+     -r services/notification/requirements.txt \
+     -r services/user/requirements.txt
    ```
 
 2. Configure the root environment file:
@@ -52,11 +54,12 @@ worker.
    ```
 
    Edit `.env` and set `MONGO_URI` to your MongoDB connection string. Keep
-   `MONGO_DB_NAME=BookMyShow`. For services running directly on your computer,
-   set `REDIS_HOST=localhost` and `RABBITMQ_HOST=localhost`; ensure Redis and
-   RabbitMQ are listening on the configured ports. `CATALOG_SERVICE_URL` should
-   be `http://localhost:8001`. The example file uses placeholder MongoDB
-   credentials and must be configured before running the backend.
+   `MONGO_DB_NAME=BookMyShow`. The example file uses placeholder MongoDB
+   credentials and must be configured before running the backend. Start Redis
+   and RabbitMQ locally and make sure they are reachable on the configured
+   ports. Set `REDIS_HOST` and `RABBITMQ_HOST` to `localhost`;
+   `CATALOG_SERVICE_URL` and `USER_SERVICE_URL` should point to their local
+   ports (`8001` and `8004`).
 
    Set `CORS_ORIGINS` to a JSON array containing the browser origins allowed to
    call the gateway. The defaults allow Angular development on
@@ -76,8 +79,8 @@ worker.
    ./scripts/dev.sh
    ```
 
-   The script starts the gateway, catalog, booking, and payment APIs with reload
-   enabled, plus the notification worker. Press **Ctrl-C** to stop them.
+   The script starts the user, gateway, catalog, booking, and payment APIs with
+   reload enabled, plus the notification worker. Press **Ctrl-C** to stop them.
 
 5. In another terminal, install and start the Angular client:
 
@@ -91,9 +94,11 @@ worker.
 
 The HTTP APIs expose interactive documentation at
 `http://localhost:8000/docs` (gateway), `http://localhost:8001/docs` (catalog),
-`http://localhost:8002/docs` (booking), and `http://localhost:8003/docs`
-(payment). The notification worker is a background consumer and does not expose
-an HTTP API.
+`http://localhost:8002/docs` (booking), `http://localhost:8003/docs` (payment),
+and `http://localhost:8004/docs` (user). Register and log in through
+`POST /api/v1/auth/register` and `POST /api/v1/auth/login`; use the returned
+Bearer token for protected routes such as `GET /api/v1/users/me`. The
+notification worker is a background consumer and does not expose an HTTP API.
 
 ## License
 

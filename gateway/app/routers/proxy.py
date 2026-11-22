@@ -25,10 +25,13 @@ def _forward_headers(
     request: Request,
     corr_id: str | None,
     user_id: str | None = None,
+    forward_authorization: bool = False,
 ) -> dict[str, str]:
     headers: dict[str, str] = {}
     for k, v in request.headers.items():
-        if k.lower() not in _HOP_BY_HOP_HEADERS and k.lower() != "authorization":
+        if k.lower() not in _HOP_BY_HOP_HEADERS and (
+            forward_authorization or k.lower() != "authorization"
+        ):
             headers[k] = v
 
     if corr_id:
@@ -49,9 +52,11 @@ async def _proxy_http(
     target_base_url: str,
     path: str,
     require_auth: bool,
+    forward_authorization: bool = False,
 ) -> Response:
-    settings = get_settings()
-    corr_id = request.headers.get(CORRELATION_ID_HEADER)
+    corr_id = request.headers.get(CORRELATION_ID_HEADER) or getattr(
+        request.state, "correlation_id", None
+    )
     user_id: str | None = None
 
     if require_auth:
@@ -64,7 +69,12 @@ async def _proxy_http(
         url = f"{url}?{query_str}"
 
     body = await request.body()
-    headers = _forward_headers(request=request, corr_id=corr_id, user_id=user_id)
+    headers = _forward_headers(
+        request=request,
+        corr_id=corr_id,
+        user_id=user_id,
+        forward_authorization=forward_authorization,
+    )
 
     client: httpx.AsyncClient = request.app.state.http_client
     try:
@@ -99,6 +109,35 @@ async def _proxy_http(
 @router.get("/health")
 async def gateway_health() -> dict[str, str]:
     return {"status": "ok", "service": "api-gateway"}
+
+
+@router.api_route(
+    "/api/v1/auth/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_auth(request: Request, path: str) -> Response:
+    settings = get_settings()
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.user_service_url,
+        path=f"/api/v1/auth/{path}",
+        require_auth=False,
+    )
+
+
+@router.api_route(
+    "/api/v1/users/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_users(request: Request, path: str) -> Response:
+    settings = get_settings()
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.user_service_url,
+        path=f"/api/v1/users/{path}",
+        require_auth=True,
+        forward_authorization=True,
+    )
 
 
 @router.api_route(
