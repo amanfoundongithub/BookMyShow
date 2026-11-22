@@ -1,0 +1,95 @@
+<div class="bookings-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">My Bookings</h1>
+      <p class="page-subtitle">
+        Showing bookings for <span class="mono-pill">{{ authService.userId() }}</span>
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      [disabled]="loading()"
+      (click)="loadBookings()"
+    >
+      {{ loading() ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-error">{{ errorMessage() }}</div>
+  }
+
+  @if (infoMessage()) {
+    <div class="alert-info">{{ infoMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="empty-card">Loading your bookings...</div>
+  } @else if (bookings().length === 0) {
+    <div class="empty-card">
+      <p class="empty-title">No bookings found yet.</p>
+      <a routerLink="/" class="primary-link">Browse Shows & Book Seats</a>
+    </div>
+  } @else {
+    <div class="bookings-list">
+      @for (bk of bookings(); track bk.booking_id) {
+        <article class="booking-card">
+          <div class="card-top">
+            <div>
+              <span class="booking-id">{{ bk.booking_id }}</span>
+              <p class="show-meta">Show: <span class="mono-pill">{{ bk.show_id }}</span></p>
+            </div>
+
+            <span
+              class="status-badge"
+              [class.status-badge--held]="bk.status === 'HELD'"
+              [class.status-badge--confirmed]="bk.status === 'CONFIRMED'"
+              [class.status-badge--cancelled]="bk.status === 'CANCELLED' || bk.status === 'EXPIRED'"
+            >
+              {{ bk.status }}
+            </span>
+          </div>
+
+          <div class="card-details">
+            <div>
+              <span class="detail-label">Seats</span>
+              <p class="detail-value">{{ bk.seats.join(', ') }}</p>
+            </div>
+            <div>
+              <span class="detail-label">Amount</span>
+              <p class="detail-value">₹{{ bk.total_amount }} {{ bk.currency }}</p>
+            </div>
+            @if (bk.hold_expires_at && bk.status === 'HELD') {
+              <div>
+                <span class="detail-label">Hold Expires</span>
+                <p class="detail-value mono">{{ bk.hold_expires_at | date: 'shortTime' }}</p>
+              </div>
+            }
+          </div>
+
+          @if (bk.status === 'HELD') {
+            <div class="card-actions">
+              <button
+                type="button"
+                class="btn-primary"
+                (click)="goToCheckout(bk)"
+              >
+                Complete Payment
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                [disabled]="busyId() === bk.booking_id"
+                (click)="releaseHold(bk)"
+              >
+                {{ busyId() === bk.booking_id ? 'Releasing...' : 'Release Hold' }}
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</div>
