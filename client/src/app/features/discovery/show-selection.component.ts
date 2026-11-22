@@ -1,0 +1,124 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { CatalogService } from '../../core/services/catalog.service';
+import { City, Movie, Show } from '../../models/bms.models';
+
+@Component({
+  selector: 'app-show-selection',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './show-selection.component.html',
+  styleUrl: './show-selection.component.css',
+})
+export class ShowSelectionComponent implements OnInit {
+  private readonly catalogService = inject(CatalogService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  readonly cities = signal<City[]>([]);
+  readonly selectedCityId = signal<string>('city_hyd');
+  readonly movies = signal<Movie[]>([]);
+  readonly selectedMovie = signal<Movie | null>(null);
+  readonly selectedDate = signal<string>(new Date().toISOString().slice(0, 10));
+  readonly shows = signal<Show[]>([]);
+
+  readonly loadingMovies = signal<boolean>(false);
+  readonly loadingShows = signal<boolean>(false);
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly userIdInput = signal<string>(this.authService.userId());
+  readonly tokenInput = signal<string>(this.authService.token() ?? '');
+
+  ngOnInit(): void {
+    this.loadCities();
+  }
+
+  saveSession(): void {
+    this.authService.setSession(this.tokenInput(), this.userIdInput());
+  }
+
+  onCityChange(cityId: string): void {
+    this.selectedCityId.set(cityId);
+    this.selectedMovie.set(null);
+    this.shows.set([]);
+    this.loadMovies(cityId);
+  }
+
+  selectMovie(movie: Movie): void {
+    this.selectedMovie.set(movie);
+    this.loadShows();
+  }
+
+  onDateChange(dateStr: string): void {
+    this.selectedDate.set(dateStr);
+    if (this.selectedMovie()) {
+      this.loadShows();
+    }
+  }
+
+  getTierEntries(pricing: Record<string, number>): [string, number][] {
+    return Object.entries(pricing || {});
+  }
+
+  openSeatMap(show: Show): void {
+    this.router.navigate(['/shows', show.id, 'seats'], {
+      queryParams: {
+        hallId: show.hall_id,
+        pricing: JSON.stringify(show.pricing ?? {}),
+      },
+    });
+  }
+
+  private loadCities(): void {
+    this.errorMessage.set(null);
+    this.catalogService.getCities().subscribe({
+      next: (cities) => {
+        this.cities.set(cities);
+        const preferred =
+          cities.find((c) => c.id === this.selectedCityId())?.id ?? cities[0]?.id ?? 'city_hyd';
+        this.selectedCityId.set(preferred);
+        this.loadMovies(preferred);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to load cities from Catalog Service.');
+      },
+    });
+  }
+
+  private loadMovies(cityId: string): void {
+    this.loadingMovies.set(true);
+    this.errorMessage.set(null);
+    this.catalogService.getMoviesByCity(cityId).subscribe({
+      next: (movies) => {
+        this.movies.set(movies);
+        this.loadingMovies.set(false);
+      },
+      error: () => {
+        this.loadingMovies.set(false);
+        this.errorMessage.set('Failed to load movies for the selected city.');
+      },
+    });
+  }
+
+  private loadShows(): void {
+    const movie = this.selectedMovie();
+    if (!movie) return;
+    this.loadingShows.set(true);
+    this.errorMessage.set(null);
+    this.catalogService
+      .getShows(movie.id, this.selectedDate(), this.selectedCityId())
+      .subscribe({
+        next: (shows) => {
+          this.shows.set(shows);
+          this.loadingShows.set(false);
+        },
+        error: () => {
+          this.loadingShows.set(false);
+          this.errorMessage.set('Failed to load showtimes.');
+        },
+      });
+  }
+}
