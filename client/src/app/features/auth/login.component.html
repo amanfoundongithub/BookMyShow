@@ -1,0 +1,151 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="auth-title">
+        {{ mode() === 'login' ? 'Sign in to BookMyShow' : 'Create your account' }}
+      </h1>
+      <p class="auth-subtitle">
+        {{
+          mode() === 'login'
+            ? 'Authenticate to get a JWT token for seat holds and payments.'
+            : 'Register a new user account and receive a session token immediately.'
+        }}
+      </p>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.mode-tab--active]="mode() === 'login'"
+        (click)="switchMode('login')"
+      >
+        Sign In
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.mode-tab--active]="mode() === 'register'"
+        (click)="switchMode('register')"
+      >
+        Create Account
+      </button>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-error">{{ errorMessage() }}</div>
+    }
+
+    @if (infoMessage()) {
+      <div class="alert-info">{{ infoMessage() }}</div>
+    }
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      @if (mode() === 'register') {
+        <div class="field-group">
+          <label for="nameInput" class="field-label">Full Name</label>
+          <input
+            id="nameInput"
+            type="text"
+            class="field-input"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
+            name="name"
+            placeholder="Aman Sharma"
+            required
+          />
+        </div>
+      }
+
+      <div class="field-group">
+        <label for="emailInput" class="field-label">Email</label>
+        <input
+          id="emailInput"
+          type="email"
+          class="field-input"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="aman@example.com"
+          required
+        />
+      </div>
+
+      <div class="field-group">
+        <label for="passwordInput" class="field-label">Password</label>
+        <input
+          id="passwordInput"
+          type="password"
+          class="field-input"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="Minimum 8 characters"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="submitting()"
+      >
+        @if (submitting()) {
+          {{ mode() === 'login' ? 'Signing in...' : 'Creating account...' }}
+        } @else {
+          {{ mode() === 'login' ? 'Sign In & Get JWT' : 'Register & Get JWT' }}
+        }
+      </button>
+    </form>
+
+    <!-- Dev Manual Token Override -->
+    <div class="dev-override">
+      <button
+        type="button"
+        class="dev-toggle"
+        (click)="showDevOverride.set(!showDevOverride())"
+      >
+        {{ showDevOverride() ? 'Hide Manual JWT Override' : 'Manual JWT / User ID Override' }}
+      </button>
+
+      @if (showDevOverride()) {
+        <div class="dev-panel">
+          <div class="field-group">
+            <label for="manualUserId" class="field-label">User ID</label>
+            <input
+              id="manualUserId"
+              type="text"
+              class="field-input"
+              [ngModel]="manualUserId()"
+              (ngModelChange)="manualUserId.set($event)"
+              placeholder="usr_991"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="manualToken" class="field-label">Bearer JWT</label>
+            <input
+              id="manualToken"
+              type="password"
+              class="field-input"
+              [ngModel]="manualToken()"
+              (ngModelChange)="manualToken.set($event)"
+              placeholder="Paste JWT token..."
+            />
+          </div>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="applyManualSession()"
+          >
+            Apply Manual Session
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
