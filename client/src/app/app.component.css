@@ -22,7 +22,7 @@
   @apply text-base;
 }
 
-.session-pill {
+.session-controls {
   @apply flex items-center gap-2.5 text-xs;
 }
 
@@ -40,6 +40,14 @@
 
 .token-indicator:not(.token-indicator--set) {
   @apply bg-amber-950/50 border-amber-700/60 text-amber-300;
+}
+
+.header-btn {
+  @apply px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium border border-slate-700 transition cursor-pointer;
+}
+
+.header-btn--accent {
+  @apply bg-rose-600 hover:bg-rose-500 text-white border-rose-500;
 }
 
 .app-main {

@@ -3,11 +3,11 @@
 }
 
 .toolbar-card {
-  @apply bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col md:flex-row md:items-end justify-between gap-4;
+  @apply bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4;
 }
 
 .city-group {
-  @apply space-y-2 flex-1;
+  @apply space-y-2;
 }
 
 .field-label {
@@ -19,31 +19,19 @@
 }
 
 .city-select {
-  @apply w-full md:w-72 text-base;
+  @apply w-full sm:w-72 text-base;
 }
 
-.session-grid {
-  @apply grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1;
+.auth-nudge {
+  @apply flex items-center gap-3 text-xs bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5;
 }
 
-.user-field input {
-  @apply w-full;
+.nudge-text {
+  @apply text-slate-400;
 }
 
-.token-row {
-  @apply sm:col-span-2 flex items-end gap-2;
-}
-
-.token-field {
-  @apply flex-1;
-}
-
-.token-field input {
-  @apply w-full;
-}
-
-.save-btn {
-  @apply px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium border border-slate-700 cursor-pointer;
+.nudge-link {
+  @apply font-semibold text-rose-400 hover:text-rose-300 underline;
 }
 
 .error-banner {

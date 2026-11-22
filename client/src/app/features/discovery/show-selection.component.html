@@ -1,5 +1,5 @@
 <div class="selection-page">
-  <!-- Top Bar: Auth Session & City Selector -->
+  <!-- Top Bar: City Selector & Auth Status -->
   <section class="toolbar-card">
     <div class="city-group">
       <label for="citySelect" class="field-label">City</label>
@@ -15,40 +15,12 @@
       </select>
     </div>
 
-    <div class="session-grid">
-      <div class="user-field">
-        <label for="userIdInput" class="field-label">User ID</label>
-        <input
-          id="userIdInput"
-          type="text"
-          class="control-input"
-          [ngModel]="userIdInput()"
-          (ngModelChange)="userIdInput.set($event)"
-          placeholder="usr_991"
-        />
+    @if (!authService.isAuthenticated()) {
+      <div class="auth-nudge">
+        <span class="nudge-text">Sign in to lock seats and complete payments.</span>
+        <a routerLink="/login" class="nudge-link">Go to Sign In</a>
       </div>
-
-      <div class="token-row">
-        <div class="token-field">
-          <label for="tokenInput" class="field-label">Bearer JWT</label>
-          <input
-            id="tokenInput"
-            type="password"
-            class="control-input"
-            [ngModel]="tokenInput()"
-            (ngModelChange)="tokenInput.set($event)"
-            placeholder="Paste JWT token..."
-          />
-        </div>
-        <button
-          type="button"
-          (click)="saveSession()"
-          class="save-btn"
-        >
-          Save
-        </button>
-      </div>
-    </div>
+    }
   </section>
 
   @if (errorMessage()) {

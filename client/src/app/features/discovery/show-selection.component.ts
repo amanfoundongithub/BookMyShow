@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { City, Movie, Show } from '../../models/bms.models';
@@ -9,13 +9,13 @@ import { City, Movie, Show } from '../../models/bms.models';
 @Component({
   selector: 'app-show-selection',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './show-selection.component.html',
   styleUrl: './show-selection.component.css',
 })
 export class ShowSelectionComponent implements OnInit {
   private readonly catalogService = inject(CatalogService);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly cities = signal<City[]>([]);
@@ -29,15 +29,8 @@ export class ShowSelectionComponent implements OnInit {
   readonly loadingShows = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly userIdInput = signal<string>(this.authService.userId());
-  readonly tokenInput = signal<string>(this.authService.token() ?? '');
-
   ngOnInit(): void {
     this.loadCities();
-  }
-
-  saveSession(): void {
-    this.authService.setSession(this.tokenInput(), this.userIdInput());
   }
 
   onCityChange(cityId: string): void {

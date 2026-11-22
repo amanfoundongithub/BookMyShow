@@ -6,14 +6,34 @@
         <span class="brand-title">BookMyShow Clone</span>
       </a>
 
-      <div class="session-pill">
-        <span class="session-user">{{ authService.userId() }}</span>
+      <div class="session-controls">
+        <span class="session-user">
+          {{ authService.currentUser()?.name || authService.userId() }}
+        </span>
+
         <span
           class="token-indicator"
-          [class.token-indicator--set]="!!authService.token()"
+          [class.token-indicator--set]="authService.isAuthenticated()"
         >
-          {{ authService.token() ? 'JWT Ready' : 'No JWT' }}
+          {{ authService.isAuthenticated() ? 'JWT Ready' : 'Guest' }}
         </span>
+
+        @if (authService.isAuthenticated()) {
+          <button
+            type="button"
+            class="header-btn"
+            (click)="logout()"
+          >
+            Logout
+          </button>
+        } @else {
+          <a
+            routerLink="/login"
+            class="header-btn header-btn--accent"
+          >
+            Sign In
+          </a>
+        }
       </div>
     </div>
   </header>
