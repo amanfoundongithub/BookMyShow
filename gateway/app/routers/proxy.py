@@ -157,6 +157,24 @@ async def proxy_catalog(request: Request, path: str) -> Response:
 
 
 @router.api_route(
+    "/api/v1/bookings",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+@router.api_route(
+    "/api/v1/bookings/",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_bookings_root(request: Request) -> Response:
+    settings = get_settings()
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.booking_service_url,
+        path="/api/v1/bookings",
+        require_auth=True,
+    )
+
+
+@router.api_route(
     "/api/v1/bookings/{path:path}",
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
 )

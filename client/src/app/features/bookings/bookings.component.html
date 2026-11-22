@@ -38,8 +38,21 @@
         <article class="booking-card">
           <div class="card-top">
             <div>
-              <span class="booking-id">{{ bk.booking_id }}</span>
-              <p class="show-meta">Show: <span class="mono-pill">{{ bk.show_id }}</span></p>
+              <div class="title-row">
+                <span class="booking-id">{{ bk.booking_id }}</span>
+                @if (bk.tier) {
+                  <span class="tier-badge">{{ bk.tier }}</span>
+                }
+              </div>
+              <p class="show-meta">
+                Show: <span class="mono-pill">{{ bk.show_id }}</span>
+                @if (bk.hall_id) {
+                  <span class="meta-sep">•</span>
+                  <span>Hall: <span class="mono-pill">{{ bk.hall_id }}</span></span>
+                }
+                <span class="meta-sep">•</span>
+                <span>User: <span class="mono-pill">{{ bk.user_id }}</span></span>
+              </p>
             </div>
 
             <span
@@ -54,17 +67,30 @@
 
           <div class="card-details">
             <div>
-              <span class="detail-label">Seats</span>
+              <span class="detail-label">Seats ({{ bk.seats.length }})</span>
               <p class="detail-value">{{ bk.seats.join(', ') }}</p>
             </div>
+
             <div>
-              <span class="detail-label">Amount</span>
-              <p class="detail-value">₹{{ bk.total_amount }} {{ bk.currency }}</p>
+              <span class="detail-label">Total Amount</span>
+              <p class="detail-value">
+                {{ bk.currency || 'INR' }} {{ bk.total_amount }}
+              </p>
             </div>
-            @if (bk.hold_expires_at && bk.status === 'HELD') {
+
+            @if (bk.created_at) {
               <div>
-                <span class="detail-label">Hold Expires</span>
-                <p class="detail-value mono">{{ bk.hold_expires_at | date: 'shortTime' }}</p>
+                <span class="detail-label">Booked At</span>
+                <p class="detail-value mono">{{ bk.created_at | date: 'medium' }}</p>
+              </div>
+            }
+
+            @if (bk.hold_expires_at) {
+              <div>
+                <span class="detail-label">
+                  {{ bk.status === 'HELD' ? 'Hold Expires At' : 'Hold Window End' }}
+                </span>
+                <p class="detail-value mono">{{ bk.hold_expires_at | date: 'medium' }}</p>
               </div>
             }
           </div>

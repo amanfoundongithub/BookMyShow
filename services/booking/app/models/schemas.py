@@ -44,3 +44,16 @@ class ReleaseBookingResponse(BaseModel):
     booking_id: str
     status: BookingStatus
     released_seats: list[str]
+
+class BookingSummaryResponse(BaseModel):
+    booking_id: str
+    show_id: str
+    hall_id: str | None = None
+    user_id: str
+    seats: list[str]
+    tier: str | None = None
+    total_amount: Decimal
+    currency: str = "INR"
+    status: BookingStatus
+    hold_expires_at: datetime | None = None
+    created_at: datetime | None = None

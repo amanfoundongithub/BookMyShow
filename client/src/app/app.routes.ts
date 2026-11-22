@@ -3,6 +3,7 @@ import { ShowSelectionComponent } from './features/discovery/show-selection.comp
 import { SeatMatrixComponent } from './features/seat-map/seat-matrix.component';
 import { CheckoutComponent } from './features/checkout/checkout.component';
 import { LoginComponent } from './features/auth/login.component';
+import { BookingsComponent } from './features/bookings/bookings.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -10,5 +11,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'shows/:showId/seats', component: SeatMatrixComponent },
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
+  { path: 'bookings', component: BookingsComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];

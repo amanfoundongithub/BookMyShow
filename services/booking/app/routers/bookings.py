@@ -1,11 +1,12 @@
 from decimal import Decimal
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from bms_common.headers import CORRELATION_ID_HEADER
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
+from bms_common.headers import CORRELATION_ID_HEADER, USER_ID_HEADER
 from app.core.config import get_settings
 from app.core.db import get_database
 from app.core.redis import get_redis
 from app.models.schemas import (
+    BookingSummaryResponse,
     HoldSeatsRequest,
     HoldSeatsResponse,
     ReleaseBookingRequest,
@@ -44,6 +45,24 @@ def _build_service(request: Request, db) -> BookingService:
         ws_manager=ws_manager,
         http_client=http_client,
     )
+
+
+@router.get("", response_model=list[BookingSummaryResponse])
+async def list_bookings(
+    request: Request,
+    user_id: str | None = Query(default=None, min_length=1),
+    x_user_id: str | None = Header(default=None, alias=USER_ID_HEADER),
+    limit: int = Query(default=50, ge=1, le=200),
+    db=Depends(get_database),
+) -> list[BookingSummaryResponse]:
+    resolved_user_id = user_id or x_user_id
+    if not resolved_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="user_id query parameter or X-User-ID header is required",
+        )
+    service = _build_service(request, db)
+    return await service.list_user_bookings(user_id=resolved_user_id, limit=limit)
 
 
 @router.get("/shows/{show_id}/seat-map", response_model=SeatMapResponse)

@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.mq import publish_booking_event
 from app.models.booking import BookingStatus
 from app.models.schemas import (
+    BookingSummaryResponse,
     HoldSeatsRequest,
     HoldSeatsResponse,
     ReleaseBookingRequest,
@@ -55,6 +56,32 @@ class BookingService:
                 if seat.get("type") != "AISLE" and seat.get("seat_number") is not None:
                     seat_ids.append(f"{row_label}{seat['seat_number']}")
         return seat_ids
+
+    async def list_user_bookings(
+        self, user_id: str, limit: int = 50
+    ) -> list[BookingSummaryResponse]:
+        cursor = (
+            self.db.bookings.find({"user_id": user_id})
+            .sort("created_at", -1)
+            .limit(limit)
+        )
+        docs = await cursor.to_list(length=limit)
+        return [
+            BookingSummaryResponse(
+                booking_id=doc.get("booking_id") or str(doc["_id"]),
+                show_id=doc["show_id"],
+                hall_id=doc.get("hall_id"),
+                user_id=doc["user_id"],
+                seats=doc.get("seats", []),
+                tier=doc.get("tier"),
+                total_amount=Decimal(str(doc.get("total_amount", "0.00"))),
+                currency=doc.get("currency", "INR"),
+                status=BookingStatus(doc["status"]),
+                hold_expires_at=doc.get("hold_expires_at"),
+                created_at=doc.get("created_at"),
+            )
+            for doc in docs
+        ]
 
     async def get_seat_map(self, show_id: str, hall_id: str) -> SeatMapResponse:
         layout_data: dict = {"hall_id": hall_id, "layout": {"rows": []}}
