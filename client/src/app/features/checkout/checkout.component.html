@@ -1,0 +1,143 @@
+<div class="checkout-page">
+  <div class="checkout-card">
+    <div class="card-header">
+      <h1 class="page-title">Checkout & Payment</h1>
+      <button type="button" class="back-link" (click)="backToDiscovery()">
+        Back to Shows
+      </button>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-error">{{ errorMessage() }}</div>
+    }
+
+    @if (statusMessage()) {
+      <div class="alert-success">{{ statusMessage() }}</div>
+    }
+
+    <!-- Hold / Booking Summary -->
+    <section class="summary-box">
+      <div class="summary-row">
+        <span class="label">Booking ID</span>
+        <input
+          type="text"
+          class="inline-input mono"
+          [ngModel]="bookingId()"
+          (ngModelChange)="bookingId.set($event)"
+          placeholder="bk_..."
+        />
+      </div>
+
+      <div class="summary-row">
+        <span class="label">User ID</span>
+        <span class="value mono">{{ userId() }}</span>
+      </div>
+
+      @if (hold()?.seats?.length) {
+        <div class="summary-row">
+          <span class="label">Seats ({{ hold()!.tier }})</span>
+          <span class="value">{{ hold()!.seats.join(', ') }}</span>
+        </div>
+      }
+
+      <div class="summary-row">
+        <span class="label">Amount</span>
+        <div class="amount-group">
+          <input
+            type="number"
+            min="1"
+            step="0.01"
+            class="inline-input amount-input"
+            [ngModel]="amount()"
+            (ngModelChange)="amount.set(+$event)"
+          />
+          <span class="currency-pill">{{ currency() }}</span>
+        </div>
+      </div>
+
+      <div class="summary-row">
+        <span class="label">Webhook Signature</span>
+        <input
+          type="password"
+          class="inline-input"
+          [ngModel]="webhookSecret()"
+          (ngModelChange)="webhookSecret.set($event)"
+          placeholder="local-webhook-secret"
+        />
+      </div>
+    </section>
+
+    <!-- Step 1: Create Payment Intent -->
+    <section class="step-section">
+      <h2 class="step-title">1. Create Idempotent Payment Intent</h2>
+      <p class="step-desc">
+        Uses key <span class="mono-pill">{{ idempotencyKey() }}</span> — retrying with the same
+        key replays the existing intent.
+      </p>
+
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="creatingIntent() || !bookingId() || amount() <= 0"
+        (click)="createIntent()"
+      >
+        {{ creatingIntent() ? 'Creating Intent...' : 'Create Payment Intent' }}
+      </button>
+    </section>
+
+    <!-- Step 2: Payment Intent Details & Simulated Webhook -->
+    @if (intent()) {
+      <section class="intent-box">
+        <h2 class="step-title">2. Payment Intent Created</h2>
+
+        <div class="intent-grid">
+          <div>
+            <span class="label">Payment ID</span>
+            <p class="value mono">{{ intent()!.payment_id }}</p>
+          </div>
+          <div>
+            <span class="label">Gateway Ref</span>
+            <p class="value mono">{{ intent()!.gateway_reference }}</p>
+          </div>
+          <div>
+            <span class="label">Intent Status</span>
+            <p class="value">{{ intent()!.status }}</p>
+          </div>
+        </div>
+
+        <div class="webhook-actions">
+          <button
+            type="button"
+            class="btn-success"
+            [disabled]="sendingWebhook()"
+            (click)="triggerWebhook('SUCCESS')"
+          >
+            {{ sendingWebhook() ? 'Processing...' : 'Simulate Payment Success' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-danger"
+            [disabled]="sendingWebhook()"
+            (click)="triggerWebhook('FAILED')"
+          >
+            Simulate Payment Failure
+          </button>
+        </div>
+      </section>
+    }
+
+    <!-- Final Webhook Result -->
+    @if (webhookResult()) {
+      <section class="result-box">
+        <h3 class="result-title">Webhook Dispatched</h3>
+        <p class="result-line">
+          Transaction Status: <strong>{{ webhookResult()!.status }}</strong>
+        </p>
+        <p class="result-line">
+          Published Event: <span class="mono-pill">{{ webhookResult()!.published_routing_key }}</span>
+        </p>
+      </section>
+    }
+  </div>
+</div>
