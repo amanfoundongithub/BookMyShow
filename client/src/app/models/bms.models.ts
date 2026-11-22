@@ -155,3 +155,17 @@ export interface AuthResponse {
   token_type: string;
   user: UserProfile;
 }
+
+export interface BookingRecord {
+  booking_id: string;
+  show_id: string;
+  hall_id?: string;
+  user_id: string;
+  seats: string[];
+  tier?: string;
+  total_amount: number;
+  currency: string;
+  status: BookingStatus;
+  hold_expires_at?: string | null;
+  created_at?: string;
+}
