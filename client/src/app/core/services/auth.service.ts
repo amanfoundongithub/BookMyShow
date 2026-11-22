@@ -69,10 +69,12 @@ export class AuthService {
   logout(): void {
     this.token.set(null);
     this.currentUser.set(null);
+    this.userId.set('');
 
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(USER_PROFILE_STORAGE_KEY);
+      localStorage.removeItem(USER_ID_STORAGE_KEY);
     }
   }
 

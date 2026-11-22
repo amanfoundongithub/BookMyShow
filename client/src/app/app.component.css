@@ -1,53 +1,76 @@
 .app-shell {
-  @apply min-h-screen bg-slate-950 text-slate-100 flex flex-col;
+  @apply min-h-screen text-slate-100 flex flex-col bg-slate-950;
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(225, 29, 72, 0.14), transparent 36%),
+    radial-gradient(circle at 88% 8%, rgba(79, 70, 229, 0.1), transparent 34%);
 }
 
 .app-header {
-  @apply sticky top-0 z-20 bg-slate-900/90 backdrop-blur border-b border-slate-800;
+  @apply sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/90 shadow-lg shadow-black/25;
 }
 
 .header-inner {
-  @apply max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4;
+  @apply max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4;
+}
+
+.header-left {
+  @apply flex items-center gap-6;
 }
 
 .brand-link {
-  @apply inline-flex items-center gap-2.5 text-white font-bold tracking-tight;
+  @apply inline-flex items-center gap-2.5 text-white font-bold tracking-tight transition hover:opacity-95;
 }
 
 .brand-badge {
-  @apply px-2 py-0.5 rounded bg-rose-600 text-white text-xs font-extrabold;
+  @apply px-2.5 py-1 rounded-lg bg-gradient-to-br from-rose-500 via-rose-600 to-red-700 text-white text-xs font-black tracking-wider shadow-md shadow-rose-950/80 border border-rose-400/30;
 }
 
 .brand-title {
-  @apply text-base;
+  @apply text-base sm:text-lg font-semibold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent;
+}
+
+.brand-tag {
+  @apply hidden md:inline-block text-[10px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800;
+}
+
+.primary-nav {
+  @apply flex items-center gap-1.5;
+}
+
+.nav-link {
+  @apply px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900/90 transition;
+}
+
+.nav-link--active {
+  @apply text-white bg-slate-900 border border-slate-800 shadow-inner;
 }
 
 .session-controls {
-  @apply flex items-center gap-2.5 text-xs;
+  @apply flex items-center gap-2 sm:gap-2.5 text-xs;
+}
+
+.user-chip {
+  @apply inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-200;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full bg-amber-400/90;
+}
+
+.status-dot--active {
+  @apply bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)];
 }
 
 .session-user {
-  @apply font-mono px-2 py-1 rounded bg-slate-800 text-slate-200;
-}
-
-.token-indicator {
-  @apply px-2 py-1 rounded border;
-}
-
-.token-indicator--set {
-  @apply bg-emerald-950/60 border-emerald-700/70 text-emerald-300;
-}
-
-.token-indicator:not(.token-indicator--set) {
-  @apply bg-amber-950/50 border-amber-700/60 text-amber-300;
+  @apply font-mono text-xs font-medium text-slate-100 max-w-28 sm:max-w-40 truncate;
 }
 
 .header-btn {
-  @apply px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium border border-slate-700 transition cursor-pointer;
+  @apply inline-flex items-center justify-center px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 hover:border-slate-600 transition cursor-pointer whitespace-nowrap;
 }
 
 .header-btn--accent {
-  @apply bg-rose-600 hover:bg-rose-500 text-white border-rose-500;
+  @apply bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white border-rose-400/40 shadow-md shadow-rose-950/70;
 }
 
 .app-main {
