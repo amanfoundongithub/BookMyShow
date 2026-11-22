@@ -1,0 +1,115 @@
+.checkout-page {
+  @apply max-w-2xl mx-auto p-6;
+}
+
+.checkout-card {
+  @apply bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6;
+}
+
+.card-header {
+  @apply flex items-center justify-between gap-4 border-b border-slate-800 pb-4;
+}
+
+.page-title {
+  @apply text-xl font-bold text-white;
+}
+
+.back-link {
+  @apply text-xs text-slate-300 hover:text-white underline cursor-pointer;
+}
+
+.alert-error {
+  @apply bg-rose-950/70 border border-rose-700 text-rose-200 px-4 py-3 rounded-lg text-sm;
+}
+
+.alert-success {
+  @apply bg-emerald-950/60 border border-emerald-700 text-emerald-200 px-4 py-3 rounded-lg text-sm;
+}
+
+.summary-box {
+  @apply bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm;
+}
+
+.summary-row {
+  @apply flex items-center justify-between gap-4;
+}
+
+.label {
+  @apply text-slate-400 text-xs uppercase tracking-wider;
+}
+
+.value {
+  @apply text-slate-100 font-medium;
+}
+
+.mono {
+  @apply font-mono text-xs;
+}
+
+.mono-pill {
+  @apply font-mono text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-200;
+}
+
+.inline-input {
+  @apply bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500;
+}
+
+.amount-group {
+  @apply flex items-center gap-2;
+}
+
+.amount-input {
+  @apply w-28 text-right;
+}
+
+.currency-pill {
+  @apply text-xs px-2 py-1 rounded bg-slate-800 text-slate-300;
+}
+
+.step-section {
+  @apply space-y-3;
+}
+
+.step-title {
+  @apply text-base font-semibold text-white;
+}
+
+.step-desc {
+  @apply text-xs text-slate-400;
+}
+
+.btn-primary {
+  @apply px-5 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 disabled:text-slate-500 text-white text-sm font-semibold transition cursor-pointer disabled:cursor-not-allowed;
+}
+
+.intent-box {
+  @apply bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-4;
+}
+
+.intent-grid {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm;
+}
+
+.webhook-actions {
+  @apply flex flex-wrap gap-3 pt-1;
+}
+
+.btn-success {
+  @apply px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold transition cursor-pointer;
+}
+
+.btn-danger {
+  @apply px-4 py-2 rounded-lg bg-rose-900/80 hover:bg-rose-800 disabled:opacity-50 text-rose-100 border border-rose-700 text-sm font-semibold transition cursor-pointer;
+}
+
+.result-box {
+  @apply bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5 text-sm;
+}
+
+.result-title {
+  @apply font-semibold text-white;
+}
+
+.result-line {
+  @apply text-slate-300;
+}
