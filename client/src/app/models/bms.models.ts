@@ -30,6 +30,7 @@ export type SeatType = 'STANDARD' | 'AISLE' | 'WHEELCHAIR';
 export type SeatLockStatus = 'AVAILABLE' | 'HELD' | 'CONFIRMED';
 export type BookingStatus = 'HELD' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED';
 export type TransactionStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
+export type UserRole = 'USER' | 'CINEMA' | 'ADMIN';
 
 export interface SeatSlot {
   seat_number?: number;
@@ -146,7 +147,8 @@ export interface UserProfile {
   user_id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
+  cinema_ids?: string[];
   created_at: string;
 }
 

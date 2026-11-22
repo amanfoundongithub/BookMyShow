@@ -7,6 +7,7 @@ import {
   LoginRequest,
   RegisterRequest,
   UserProfile,
+  UserRole,
 } from '../../models/bms.models';
 
 const TOKEN_STORAGE_KEY = 'bms_jwt_token';
@@ -23,6 +24,45 @@ export class AuthService {
   readonly userId = signal<string>(this.readInitialUserId());
   readonly currentUser = signal<UserProfile | null>(this.readInitialUserProfile());
   readonly isAuthenticated = computed(() => Boolean(this.token()));
+
+  readonly role = computed<UserRole>(() => {
+    const profileRole = this.currentUser()?.role;
+    if (profileRole === 'ADMIN' || profileRole === 'CINEMA' || profileRole === 'USER') {
+      return profileRole;
+    }
+
+    const claims = this.decodeJwtPayload(this.token());
+    const claimRole = claims?.['role'];
+    if (claimRole === 'ADMIN' || claimRole === 'CINEMA' || claimRole === 'USER') {
+      return claimRole;
+    }
+
+    return 'USER';
+  });
+
+  readonly cinemaIds = computed<string[]>(() => {
+    const profileCinemas = this.currentUser()?.cinema_ids;
+    if (Array.isArray(profileCinemas)) {
+      return profileCinemas;
+    }
+
+    const claims = this.decodeJwtPayload(this.token());
+    const claimCinemas = claims?.['cinema_ids'];
+    return Array.isArray(claimCinemas)
+      ? claimCinemas.filter((id): id is string => typeof id === 'string')
+      : [];
+  });
+
+  readonly isAdmin = computed(() => this.role() === 'ADMIN');
+  readonly isCinema = computed(() => this.role() === 'CINEMA');
+  readonly isStaff = computed(() => {
+    const r = this.role();
+    return r === 'ADMIN' || r === 'CINEMA';
+  });
+
+  hasAnyRole(allowedRoles: readonly UserRole[]): boolean {
+    return allowedRoles.includes(this.role());
+  }
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http
@@ -137,6 +177,21 @@ export class AuthService {
     }
     try {
       return JSON.parse(raw) as UserProfile;
+    } catch {
+      return null;
+    }
+  }
+
+  private decodeJwtPayload(token: string | null): Record<string, unknown> | null {
+    if (!token) return null;
+    const parts = token.split('.');
+    if (parts.length !== 3 || !parts[1]) return null;
+
+    try {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const jsonStr = atob(padded);
+      return JSON.parse(jsonStr) as Record<string, unknown>;
     } catch {
       return null;
     }

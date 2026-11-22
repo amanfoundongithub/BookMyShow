@@ -76,3 +76,7 @@
 .app-main {
   @apply flex-1;
 }
+
+.role-tag {
+  @apply text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800/70;
+}
