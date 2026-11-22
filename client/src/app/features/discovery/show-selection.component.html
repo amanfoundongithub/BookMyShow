@@ -1,0 +1,155 @@
+<div class="selection-page">
+  <!-- Top Bar: Auth Session & City Selector -->
+  <section class="toolbar-card">
+    <div class="city-group">
+      <label for="citySelect" class="field-label">City</label>
+      <select
+        id="citySelect"
+        class="control-input city-select"
+        [ngModel]="selectedCityId()"
+        (ngModelChange)="onCityChange($event)"
+      >
+        @for (city of cities(); track city.id) {
+          <option [value]="city.id">{{ city.name }}, {{ city.state }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="session-grid">
+      <div class="user-field">
+        <label for="userIdInput" class="field-label">User ID</label>
+        <input
+          id="userIdInput"
+          type="text"
+          class="control-input"
+          [ngModel]="userIdInput()"
+          (ngModelChange)="userIdInput.set($event)"
+          placeholder="usr_991"
+        />
+      </div>
+
+      <div class="token-row">
+        <div class="token-field">
+          <label for="tokenInput" class="field-label">Bearer JWT</label>
+          <input
+            id="tokenInput"
+            type="password"
+            class="control-input"
+            [ngModel]="tokenInput()"
+            (ngModelChange)="tokenInput.set($event)"
+            placeholder="Paste JWT token..."
+          />
+        </div>
+        <button
+          type="button"
+          (click)="saveSession()"
+          class="save-btn"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Movies List -->
+  <section class="movies-section">
+    <h2 class="section-heading">Now Showing</h2>
+
+    @if (loadingMovies()) {
+      <p class="status-text">Loading movies...</p>
+    } @else if (movies().length === 0) {
+      <p class="status-text">No movies with upcoming shows in this city.</p>
+    } @else {
+      <div class="movies-grid">
+        @for (movie of movies(); track movie.id) {
+          <button
+            type="button"
+            (click)="selectMovie(movie)"
+            class="movie-card"
+            [class.movie-card--selected]="selectedMovie()?.id === movie.id"
+          >
+            <div class="movie-card__header">
+              <h3 class="movie-title">{{ movie.title }}</h3>
+              <span class="rating-badge">{{ movie.rating }}</span>
+            </div>
+
+            <p class="movie-duration">{{ movie.duration_minutes }} mins</p>
+
+            <div class="meta-tags">
+              @for (lang of movie.languages; track lang) {
+                <span class="lang-tag">{{ lang }}</span>
+              }
+              @for (fmt of movie.formats; track fmt) {
+                <span class="format-tag">{{ fmt }}</span>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Showtimes for Selected Movie -->
+  @if (selectedMovie()) {
+    <section class="showtimes-panel">
+      <div class="showtimes-header">
+        <div>
+          <h2 class="panel-heading">Showtimes — {{ selectedMovie()!.title }}</h2>
+          <p class="panel-subtitle">Select a show to open the real-time seat matrix</p>
+        </div>
+
+        <div class="date-group">
+          <label for="showDateInput" class="date-label">Date</label>
+          <input
+            id="showDateInput"
+            type="date"
+            class="control-input"
+            [ngModel]="selectedDate()"
+            (ngModelChange)="onDateChange($event)"
+          />
+        </div>
+      </div>
+
+      @if (loadingShows()) {
+        <p class="status-text">Loading showtimes...</p>
+      } @else if (shows().length === 0) {
+        <p class="status-text">No shows scheduled for {{ selectedDate() }}.</p>
+      } @else {
+        <div class="shows-grid">
+          @for (show of shows(); track show.id) {
+            <div class="show-card">
+              <div>
+                <div class="show-card__top">
+                  <span class="show-time">{{ show.start_time | date: 'shortTime' }}</span>
+                  <span class="show-format">{{ show.format }} • {{ show.language }}</span>
+                </div>
+
+                <p class="show-venue">Cinema: {{ show.cinema_id }} • Hall: {{ show.hall_id }}</p>
+
+                <div class="pricing-list">
+                  @for (tier of getTierEntries(show.pricing); track tier[0]) {
+                    <span class="tier-chip">{{ tier[0] }}: ₹{{ tier[1] }}</span>
+                  }
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="openSeatMap(show)"
+                class="select-seats-btn"
+              >
+                Select Seats
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>
