@@ -1,5 +1,6 @@
 from functools import lru_cache
 from urllib.parse import quote_plus
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,11 +18,8 @@ class Settings(BaseSettings):
 
     webhook_secret: str = "local-webhook-secret"
 
-    mongo_initdb_root_username: str
-    mongo_initdb_root_password: str
-    mongo_host: str = "localhost"
-    mongo_port: int = 27017
-    mongo_db_name: str = "payments_db"
+    mongo_connection_uri: str = Field(validation_alias="MONGO_URI")
+    mongo_db_name: str = Field(default="BookMyShow", validation_alias="MONGO_DB_NAME")
 
     rabbitmq_default_user: str = "guest"
     rabbitmq_default_pass: str = "guest"
@@ -31,12 +29,7 @@ class Settings(BaseSettings):
 
     @property
     def mongo_uri(self) -> str:
-        user = quote_plus(self.mongo_initdb_root_username)
-        password = quote_plus(self.mongo_initdb_root_password)
-        return (
-            f"mongodb://{user}:{password}@{self.mongo_host}:{self.mongo_port}/"
-            f"?authSource=admin"
-        )
+        return self.mongo_connection_uri
 
     @property
     def rabbitmq_url(self) -> str:

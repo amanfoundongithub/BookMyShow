@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me-in-local-dev"
     jwt_algorithm: str = "HS256"
 
-    catalog_service_url: str = "http://catalog-service:8001"
-    booking_service_url: str = "http://booking-service:8002"
-    payment_service_url: str = "http://payment-service:8003"
+    catalog_service_url: str = "http://localhost:8001"
+    booking_service_url: str = "http://localhost:8002"
+    payment_service_url: str = "http://localhost:8003"
 
     upstream_timeout_seconds: float = 10.0
 
