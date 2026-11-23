@@ -11,17 +11,20 @@ and event-driven notification handling.
 | Angular client | 4200 | Movie discovery, seat selection, and checkout |
 | API gateway | 8000 | HTTP/WebSocket proxy, JWT validation, and CORS |
 | User service | 8004 | Account registration, login, and profile lookup |
+| Cinema service | 8005 | Cinema management |
+| Hall service | 8006 | Hall and seat-layout management |
+| Movie service | 8007 | Movie metadata management |
 | Catalog service | 8001 | Cities, cinemas, halls, movies, and showtimes |
 | Booking service | 8002 | Seat maps, temporary seat holds, and booking state |
 | Payment service | 8003 | Payment intents and webhook processing using a mock gateway |
 | Notification worker | — | Consumes booking/payment events from RabbitMQ |
 
-The gateway routes client requests to the services. User, catalog, booking, and
-payment data use the shared MongoDB database configured by `MONGO_DB_NAME`
-(default: `BookMyShow`). The user service stores accounts; the catalog stores
-cities, cinemas, halls, movies, and shows; booking and payment store bookings
-and transactions. Redis backs catalog caching and seat holds. RabbitMQ carries
-booking/payment events to the notification worker.
+The gateway routes client requests to the services. User, catalog, booking,
+payment, cinema, hall, and movie data use the shared MongoDB database configured
+by `MONGO_DB_NAME` (default: `BookMyShow`). The catalog serves cities and
+showtimes; booking and payment store bookings and transactions. Redis backs
+catalog caching and seat holds. RabbitMQ carries booking/payment events to the
+notification worker.
 
 ## Requirements
 
@@ -43,6 +46,7 @@ booking/payment events to the notification worker.
      -r services/catalog/requirements.txt \
      -r services/booking/requirements.txt \
      -r services/payment/requirements.txt \
+     -r services/movies/requirements.txt \
      -r services/notification/requirements.txt \
      -r services/user/requirements.txt
    ```
@@ -79,8 +83,9 @@ booking/payment events to the notification worker.
    ./scripts/dev.sh
    ```
 
-   The script starts the user, gateway, catalog, booking, and payment APIs with
-   reload enabled, plus the notification worker. Press **Ctrl-C** to stop them.
+   The script starts the user, gateway, catalog, booking, payment, cinema, hall,
+   and movie APIs with reload enabled, plus the notification worker. Press
+   **Ctrl-C** to stop them.
 
 5. In another terminal, install and start the Angular client:
 
@@ -95,7 +100,8 @@ booking/payment events to the notification worker.
 The HTTP APIs expose interactive documentation at
 `http://localhost:8000/docs` (gateway), `http://localhost:8001/docs` (catalog),
 `http://localhost:8002/docs` (booking), `http://localhost:8003/docs` (payment),
-and `http://localhost:8004/docs` (user). Register and log in through
+`http://localhost:8004/docs` (user), and `http://localhost:8007/docs` (movies).
+Register and log in through
 `POST /api/v1/auth/register` and `POST /api/v1/auth/login`; use the returned
 Bearer token for protected routes such as `GET /api/v1/users/me` and
 `GET /api/v1/bookings?user_id=<user-id>`. The gateway accepts the booking

@@ -251,6 +251,42 @@ async def proxy_halls(request: Request, path: str) -> Response:
 
 
 @router.api_route(
+    "/api/v1/movies",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+@router.api_route(
+    "/api/v1/movies/",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_movies_root(request: Request) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.movie_service_url,
+        path="/api/v1/movies",
+        require_auth=is_write,
+        allowed_roles={"ADMIN"} if is_write else None,
+    )
+
+
+@router.api_route(
+    "/api/v1/movies/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_movies(request: Request, path: str) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.movie_service_url,
+        path=f"/api/v1/movies/{path}",
+        require_auth=is_write,
+        allowed_roles={"ADMIN"} if is_write else None,
+    )
+
+
+@router.api_route(
     "/api/v1/catalog/{path:path}",
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
 )

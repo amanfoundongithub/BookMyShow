@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     user_service_url: str = "http://localhost:8004"
     cinema_service_url: str = "http://localhost:8005"
     hall_service_url: str = "http://localhost:8006"
+    movie_service_url: str = "http://localhost:8007"
     cors_origins: list[str] = [
         "http://localhost:4200",
         "http://127.0.0.1:4200",
