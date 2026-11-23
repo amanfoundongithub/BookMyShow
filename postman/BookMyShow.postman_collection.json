@@ -1,0 +1,326 @@
+{
+  "info": {
+    "name": "BookMyShow APIs",
+    "description": "Gateway-first collection for the BookMyShow FastAPI services.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gatewayUrl", "value": "http://localhost:8000" },
+    { "key": "catalogUrl", "value": "http://localhost:8001" },
+    { "key": "bookingUrl", "value": "http://localhost:8002" },
+    { "key": "paymentUrl", "value": "http://localhost:8003" },
+    { "key": "userUrl", "value": "http://localhost:8004" },
+    { "key": "cinemaUrl", "value": "http://localhost:8005" },
+    { "key": "hallUrl", "value": "http://localhost:8006" },
+    { "key": "movieUrl", "value": "http://localhost:8007" },
+    { "key": "bearerToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "cityId", "value": "blr" },
+    { "key": "movieId", "value": "movie-inception" },
+    { "key": "cinemaId", "value": "" },
+    { "key": "hallId", "value": "" },
+    { "key": "showId", "value": "" },
+    { "key": "bookingId", "value": "" },
+    { "key": "paymentId", "value": "" },
+    { "key": "idempotencyKey", "value": "payment-{{$timestamp}}" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{gatewayUrl}}/health" }
+        },
+        {
+          "name": "Auth - Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.access_token) pm.collectionVariables.set('bearerToken', body.access_token);",
+            "if (body.user && body.user.user_id) pm.collectionVariables.set('userId', body.user.user_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Auth - Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.access_token) pm.collectionVariables.set('bearerToken', body.access_token);",
+            "if (body.user && body.user.user_id) pm.collectionVariables.set('userId', body.user.user_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Users - Me",
+          "request": { "method": "GET", "url": "{{gatewayUrl}}/api/v1/users/me" }
+        },
+        {
+          "name": "Users - Admin Create User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cinema Manager\",\n  \"email\": \"cinema{{$timestamp}}@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"CINEMA\",\n  \"cinema_ids\": [\"{{cinemaId}}\"]\n}" },
+            "url": "{{gatewayUrl}}/api/v1/users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "Cities",
+          "request": { "method": "GET", "url": "{{gatewayUrl}}/api/v1/catalog/cities" }
+        },
+        {
+          "name": "Movies by City",
+          "request": { "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/catalog/movies?city={{cityId}}", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "catalog", "movies"], "query": [{ "key": "city", "value": "{{cityId}}" }] } }
+        },
+        {
+          "name": "Shows",
+          "request": { "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/catalog/shows?movie_id={{movieId}}&date=2026-12-01&city={{cityId}}", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "catalog", "shows"], "query": [
+            { "key": "movie_id", "value": "{{movieId}}" },
+            { "key": "date", "value": "2026-12-01" },
+            { "key": "city", "value": "{{cityId}}" }
+          ] } }
+        },
+        {
+          "name": "Create Show",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"show-{{$timestamp}}\",\n  \"movie_id\": \"{{movieId}}\",\n  \"cinema_id\": \"{{cinemaId}}\",\n  \"hall_id\": \"{{hallId}}\",\n  \"start_time\": \"2026-12-01T18:00:00Z\",\n  \"end_time\": \"2026-12-01T21:00:00Z\",\n  \"language\": \"English\",\n  \"format\": \"2D\",\n  \"pricing\": {\"STANDARD\": 250, \"PREMIUM\": 350}\n}" },
+            "url": "{{gatewayUrl}}/api/v1/catalog/shows"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.id) pm.collectionVariables.set('showId', body.id);"
+          ], "type": "text/javascript" }}]
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Movie Metadata",
+          "request": { "method": "GET", "url": "{{gatewayUrl}}/api/v1/movies/meta" }
+        },
+        {
+          "name": "List Movies",
+          "request": { "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/movies?city={{cityId}}&active_only=true", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "movies"], "query": [
+            { "key": "city", "value": "{{cityId}}" }, { "key": "active_only", "value": "true" }
+          ] } }
+        },
+        {
+          "name": "Get Movie",
+          "request": { "method": "GET", "url": "{{gatewayUrl}}/api/v1/movies/{{movieId}}" }
+        },
+        {
+          "name": "Create Movie",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"movie-{{$timestamp}}\",\n  \"title\": \"Example Movie\",\n  \"duration_minutes\": 150,\n  \"rating\": \"UA\",\n  \"languages\": [\"English\"],\n  \"formats\": [\"2D\"],\n  \"synopsis\": \"A sample movie\",\n  \"city_ids\": [\"{{cityId}}\"],\n  \"release_date\": \"2026-12-01\",\n  \"poster_url\": null,\n  \"is_active\": true\n}" },
+            "url": "{{gatewayUrl}}/api/v1/movies"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.id) pm.collectionVariables.set('movieId', body.id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Example Movie\",\n  \"is_active\": true\n}" },
+            "url": "{{gatewayUrl}}/api/v1/movies/{{movieId}}"
+          }
+        },
+        {
+          "name": "Delete Movie",
+          "request": { "method": "DELETE", "url": "{{gatewayUrl}}/api/v1/movies/{{movieId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Cinemas",
+      "item": [
+        {
+          "name": "List Cinemas",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/cinemas?city_id={{cityId}}&include_inactive=false", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "cinemas"], "query": [
+            { "key": "city_id", "value": "{{cityId}}" }, { "key": "include_inactive", "value": "false" }
+          ] } }
+        },
+        {
+          "name": "Get Cinema",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{gatewayUrl}}/api/v1/cinemas/{{cinemaId}}" }
+        },
+        {
+          "name": "Create Cinema",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"PVR Central\",\n  \"city_id\": \"{{cityId}}\",\n  \"state\": \"Karnataka\",\n  \"address\": \"MG Road, Bengaluru\",\n  \"amenities\": [\"Parking\", \"Food Court\"]\n}" },
+            "url": "{{gatewayUrl}}/api/v1/cinemas"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.cinema_id) pm.collectionVariables.set('cinemaId', body.cinema_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Update Cinema",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"PVR Central Updated\",\n  \"amenities\": [\"Parking\", \"Food Court\", \"Dolby Atmos\"],\n  \"is_active\": true\n}" },
+            "url": "{{gatewayUrl}}/api/v1/cinemas/{{cinemaId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Halls",
+      "item": [
+        {
+          "name": "List Halls",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/halls?cinema_id={{cinemaId}}", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "halls"], "query": [{ "key": "cinema_id", "value": "{{cinemaId}}" }] } }
+        },
+        {
+          "name": "Get Hall",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{gatewayUrl}}/api/v1/halls/{{hallId}}" }
+        },
+        {
+          "name": "Get Hall Layout",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{gatewayUrl}}/api/v1/halls/{{hallId}}/layout" }
+        },
+        {
+          "name": "Create Hall",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cinema_id\": \"{{cinemaId}}\",\n  \"name\": \"Screen 1\",\n  \"screen_format\": \"2D\",\n  \"layout\": {\n    \"rows\": [\n      {\"row_label\": \"A\", \"seats\": [{\"seat_number\": 1, \"type\": \"PREMIUM\", \"tier\": \"PREMIUM\"}, {\"seat_number\": 2, \"type\": \"PREMIUM\", \"tier\": \"PREMIUM\"}]},\n      {\"row_label\": \"B\", \"seats\": [{\"seat_number\": 1, \"type\": \"STANDARD\", \"tier\": \"STANDARD\"}, {\"seat_number\": 2, \"type\": \"STANDARD\", \"tier\": \"STANDARD\"}]}\n    ]\n  }\n}" },
+            "url": "{{gatewayUrl}}/api/v1/halls"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.hall_id) pm.collectionVariables.set('hallId', body.hall_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Update Hall Layout",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Screen 1 Updated\",\n  \"screen_format\": \"3D\",\n  \"layout\": {\n    \"rows\": [{\"row_label\": \"A\", \"seats\": [{\"seat_number\": 1, \"type\": \"STANDARD\", \"tier\": \"STANDARD\"}, {\"seat_number\": 2, \"type\": \"STANDARD\", \"tier\": \"STANDARD\"}]}]\n  }\n}" },
+            "url": "{{gatewayUrl}}/api/v1/halls/{{hallId}}/layout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "List My Bookings",
+          "request": { "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/bookings?user_id={{userId}}&limit=50", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "bookings"], "query": [
+            { "key": "user_id", "value": "{{userId}}" }, { "key": "limit", "value": "50" }
+          ] } }
+        },
+        {
+          "name": "Get Seat Map",
+          "request": { "method": "GET", "url": { "raw": "{{gatewayUrl}}/api/v1/bookings/shows/{{showId}}/seat-map?hall_id={{hallId}}", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "bookings", "shows", "{{showId}}", "seat-map"], "query": [{ "key": "hall_id", "value": "{{hallId}}" }] } }
+        },
+        {
+          "name": "Hold Seats",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"show_id\": \"{{showId}}\",\n  \"user_id\": \"{{userId}}\",\n  \"seats\": [\"A-1\", \"A-2\"],\n  \"tier\": \"STANDARD\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/api/v1/bookings/hold?tier_price=250.00", "host": ["{{gatewayUrl}}"], "path": ["api", "v1", "bookings", "hold"], "query": [{ "key": "tier_price", "value": "250.00" }] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.booking_id) pm.collectionVariables.set('bookingId', body.booking_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Release Booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"booking_id\": \"{{bookingId}}\",\n  \"user_id\": \"{{userId}}\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/bookings/release"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment Intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"booking_id\": \"{{bookingId}}\",\n  \"user_id\": \"{{userId}}\",\n  \"amount\": 500,\n  \"currency\": \"INR\",\n  \"payment_gateway\": \"MOCK_GATEWAY\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/payments/create-intent"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.payment_id) pm.collectionVariables.set('paymentId', body.payment_id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Payment Webhook",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Webhook-Signature", "value": "replace-with-valid-hmac-signature" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"payment_id\": \"{{paymentId}}\",\n  \"booking_id\": \"{{bookingId}}\",\n  \"gateway_reference\": \"mock-gateway-reference\",\n  \"event_status\": \"SUCCESS\",\n  \"failure_reason\": null\n}" },
+            "url": "{{gatewayUrl}}/api/v1/payments/webhook"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Direct Service Health",
+      "item": [
+        { "name": "Catalog Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{catalogUrl}}/health" } },
+        { "name": "Catalog Ready", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{catalogUrl}}/ready" } },
+        { "name": "Booking Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{bookingUrl}}/health" } },
+        { "name": "Booking Ready", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{bookingUrl}}/ready" } },
+        { "name": "Payment Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{paymentUrl}}/health" } },
+        { "name": "Payment Ready", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{paymentUrl}}/ready" } },
+        { "name": "User Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{userUrl}}/health" } },
+        { "name": "Cinema Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{cinemaUrl}}/health" } },
+        { "name": "Hall Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{hallUrl}}/health" } },
+        { "name": "Movie Health", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{movieUrl}}/health" } }
+      ]
+    }
+  ]
+}
