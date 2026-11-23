@@ -4,6 +4,18 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { City, HallLayoutResponse, Movie, Show } from '../../models/bms.models';
 
+export interface CreateShowPayload {
+  id?: string;
+  movie_id: string;
+  cinema_id: string;
+  hall_id: string;
+  start_time: string;
+  end_time: string;
+  language: string;
+  format: string;
+  pricing: Record<string, number>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
   private readonly http = inject(HttpClient);
@@ -28,5 +40,9 @@ export class CatalogService {
 
   getHallLayout(hallId: string): Observable<HallLayoutResponse> {
     return this.http.get<HallLayoutResponse>(`${this.baseUrl}/halls/${hallId}/layout`);
+  }
+
+  createShow(payload: CreateShowPayload): Observable<Show> {
+    return this.http.post<Show>(`${this.baseUrl}/shows`, payload);
   }
 }

@@ -1,0 +1,124 @@
+/* Custom component-level styling (if not covered by Tailwind) */
+@reference "tailwindcss";
+
+:host {
+  display: block;
+}
+
+.builder-container {
+  @apply max-w-6xl mx-auto p-6 space-y-6;
+}
+
+.builder-header {
+  @apply flex flex-wrap items-center justify-between gap-4;
+}
+
+.builder-title {
+  @apply text-2xl font-bold text-slate-900;
+}
+
+.builder-subtitle {
+  @apply text-sm text-slate-500;
+}
+
+.seat-counter-badge {
+  @apply rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800;
+}
+
+.seat-counter-value {
+  @apply font-bold text-indigo-600;
+}
+
+.selector-card,
+.toolbar-card {
+  @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm;
+}
+
+.selector-grid {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4;
+}
+
+.field-label {
+  @apply block text-xs font-semibold uppercase text-slate-500 mb-1;
+}
+
+.field-input {
+  @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-indigo-600;
+}
+
+.field-select {
+  @apply bg-white;
+}
+
+.toolbar-layout {
+  @apply flex flex-wrap items-center justify-between gap-4;
+}
+
+.brush-group,
+.dimension-group {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.toolbar-label {
+  @apply text-xs font-semibold uppercase text-slate-500 mr-1;
+}
+
+.brush-btn {
+  @apply rounded-lg px-3 py-1.5 text-xs font-semibold transition border cursor-pointer;
+}
+
+.brush-btn-inactive {
+  @apply bg-white text-slate-700 border-slate-300 hover:bg-slate-50;
+}
+
+.brush-btn-active {
+  @apply ring-2 ring-indigo-500 ring-offset-1;
+}
+
+.dimension-btn {
+  @apply rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer;
+}
+
+.alert-error {
+  @apply rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700;
+}
+
+.alert-success {
+  @apply rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700;
+}
+
+.grid-card {
+  @apply rounded-xl border border-slate-200 bg-white p-6 shadow-sm overflow-x-auto;
+}
+
+.screen-banner {
+  @apply mb-6 mx-auto max-w-md rounded-b-xl bg-slate-200 py-1.5 text-center text-xs font-semibold tracking-widest uppercase text-slate-600;
+}
+
+.rows-stack {
+  @apply space-y-2.5 min-w-fit;
+}
+
+.seat-row {
+  @apply flex items-center gap-2;
+}
+
+.row-label {
+  @apply w-7 text-center text-xs font-bold text-slate-600;
+}
+
+.row-seats {
+  @apply flex items-center gap-1.5;
+}
+
+.seat-cell-btn {
+  @apply h-8 w-8 rounded-md border text-[11px] font-semibold flex items-center justify-center transition hover:scale-105 cursor-pointer;
+}
+
+.builder-footer {
+  @apply flex justify-end;
+}
+
+.save-btn {
+  @apply rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition cursor-pointer;
+}

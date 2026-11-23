@@ -63,14 +63,15 @@
         <div class="seat-row">
           <div class="row-meta">
             <span class="row-label">{{ row.row_label }}</span>
-            <span class="row-tier">{{ row.tier }}</span>
+            <span class="row-tier">{{ row.tier ?? 'STANDARD' }}</span>
           </div>
 
           <div class="row-seats">
             @for (slot of row.seats; track $index) {
               @if (slot.type === 'AISLE') {
                 <div class="aisle-gap" aria-hidden="true"></div>
-              } @else {
+              } @else if (slot.seat_number != null) {
+                @let tier = slot.tier ?? row.tier ?? 'STANDARD';
                 @let code = formatSeatCode(row.row_label, slot.seat_number);
                 @let state = getSeatVisualState(code);
                 <button
@@ -81,8 +82,8 @@
                   [class.seat-btn--held]="state === 'HELD'"
                   [class.seat-btn--confirmed]="state === 'CONFIRMED'"
                   [disabled]="isSeatDisabled(code, state)"
-                  (click)="toggleSeat(code, row.tier)"
-                  [title]="code + ' (' + row.tier + ') — ' + state"
+                  (click)="toggleSeat(code, tier)"
+                  [title]="code + ' (' + tier + ') — ' + state"
                 >
                   {{ slot.seat_number }}
                 </button>

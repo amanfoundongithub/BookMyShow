@@ -5,6 +5,7 @@ import { CheckoutComponent } from './features/checkout/checkout.component';
 import { LoginComponent } from './features/auth/login.component';
 import { BookingsComponent } from './features/bookings/bookings.component';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   { path: '', component: ShowSelectionComponent },
@@ -12,5 +13,38 @@ export const routes: Routes = [
   { path: 'shows/:showId/seats', component: SeatMatrixComponent },
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
   { path: 'bookings', component: BookingsComponent, canActivate: [authGuard] },
+  {
+    path: 'management',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN', 'CINEMA'] },
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'cinemas/new',
+      },
+      {
+        path: 'cinemas/new',
+        loadComponent: () =>
+          import('./features/management/cinema-create.component').then(
+            (m) => m.CinemaCreateComponent
+          ),
+      },
+      {
+        path: 'halls',
+        loadComponent: () =>
+          import('./features/management/hall-layout-builder.component').then(
+            (m) => m.HallLayoutBuilderComponent
+          ),
+      },
+      {
+        path: 'shows',
+        loadComponent: () =>
+          import('./features/management/show-scheduler.component').then(
+            (m) => m.ShowSchedulerComponent
+          ),
+      },
+    ],
+  },
   { path: '**', redirectTo: '' },
 ];

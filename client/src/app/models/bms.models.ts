@@ -26,20 +26,21 @@ export interface Show {
   pricing: Record<string, number>;
 }
 
-export type SeatType = 'STANDARD' | 'AISLE' | 'WHEELCHAIR';
+export type SeatType = 'STANDARD' | 'PREMIUM' | 'RECLINER' | 'AISLE' | 'WHEELCHAIR';
 export type SeatLockStatus = 'AVAILABLE' | 'HELD' | 'CONFIRMED';
 export type BookingStatus = 'HELD' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED';
 export type TransactionStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
 export type UserRole = 'USER' | 'CINEMA' | 'ADMIN';
 
 export interface SeatSlot {
-  seat_number?: number;
+  seat_number?: number | null;
   type: SeatType;
+  tier?: string;
 }
 
 export interface HallRow {
   row_label: string;
-  tier: string;
+  tier?: string;
   seats: SeatSlot[];
 }
 
@@ -47,10 +48,52 @@ export interface HallLayoutResponse {
   hall_id: string;
   cinema_id: string;
   name: string;
+  screen_format?: string;
   total_seats: number;
   layout: {
     rows: HallRow[];
   };
+  created_at?: string;
+}
+
+export interface CinemaSummary {
+  cinema_id: string;
+  name: string;
+  city_id: string;
+  state?: string | null;
+  address: string;
+  amenities?: string[];
+  is_active?: boolean;
+  created_at?: string;
+}
+
+export interface CreateHallPayload {
+  cinema_id: string;
+  name: string;
+  screen_format: string;
+  layout: {
+    rows: HallRow[];
+  };
+}
+
+export interface UpdateHallLayoutPayload {
+  name?: string;
+  screen_format?: string;
+  layout: {
+    rows: HallRow[];
+  };
+}
+
+export interface HallResponse {
+  hall_id: string;
+  cinema_id: string;
+  name: string;
+  screen_format: string;
+  total_seats: number;
+  layout: {
+    rows: HallRow[];
+  };
+  created_at: string;
 }
 
 export interface SeatMapResponse {
@@ -170,4 +213,13 @@ export interface BookingRecord {
   status: BookingStatus;
   hold_expires_at?: string | null;
   created_at?: string;
+}
+
+export interface CreateCinemaPayload {
+  name: string;
+  city_id: string;
+  state?: string | null;
+  address: string;
+  amenities?: string[];
+  is_active?: boolean;
 }
