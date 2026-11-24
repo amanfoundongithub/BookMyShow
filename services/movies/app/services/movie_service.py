@@ -79,7 +79,7 @@ class MovieService:
         movie_id = payload.id or f"mov_{uuid4().hex[:10]}"
         doc: dict[str, Any] = {
             "_id": movie_id,
-            **payload.model_dump(exclude={"id"}),
+            **payload.model_dump(mode="json", exclude={"id"}),
             "created_at": datetime.now(timezone.utc),
         }
         try:
@@ -102,7 +102,7 @@ class MovieService:
         if not existing:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
 
-        updates = payload.model_dump(exclude_unset=True, exclude_none=True)
+        updates = payload.model_dump(mode="json", exclude_unset=True, exclude_none=True)
         if updates:
             await self.db.movies.update_one({"_id": movie_id}, {"$set": updates})
 

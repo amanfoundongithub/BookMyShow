@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import patch
 import pytest
 import pytest_asyncio
+from bson import BSON
 from httpx import ASGITransport, AsyncClient
 from pymongo.errors import DuplicateKeyError
 from app.core.db import get_database
@@ -36,11 +37,13 @@ class FakeCollection:
         )
 
     async def insert_one(self, doc: dict[str, Any]) -> None:
+        BSON.encode(doc)
         if await self.find_one({"_id": doc["_id"]}):
             raise DuplicateKeyError("duplicate movie id")
         self.docs.append(deepcopy(doc))
 
     async def update_one(self, query: dict[str, Any], update: dict[str, Any]) -> None:
+        BSON.encode(update["$set"])
         for doc in self.docs:
             if self._matches(doc, query):
                 doc.update(deepcopy(update["$set"]))
@@ -108,6 +111,7 @@ async def test_movie_crud_requires_admin_and_persists_updates(client: AsyncClien
         "duration_minutes": 148,
         "languages": ["English"],
         "formats": ["IMAX 2D"],
+        "release_date": "2026-11-24",
     }
 
     forbidden = await client.post("/api/v1/movies", json=payload)
@@ -120,14 +124,16 @@ async def test_movie_crud_requires_admin_and_persists_updates(client: AsyncClien
     )
     assert created.status_code == 201
     assert created.json()["id"] == "mov_inception"
+    assert created.json()["release_date"] == "2026-11-24"
 
     updated = await client.patch(
         "/api/v1/movies/mov_inception",
-        json={"title": "Inception: Reissue"},
+        json={"title": "Inception: Reissue", "release_date": "2026-12-01"},
         headers={"X-User-Role": "ADMIN"},
     )
     assert updated.status_code == 200
     assert updated.json()["title"] == "Inception: Reissue"
+    assert updated.json()["release_date"] == "2026-12-01"
 
     deleted = await client.delete(
         "/api/v1/movies/mov_inception",
