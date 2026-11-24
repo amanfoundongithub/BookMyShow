@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Header, Query, Request, status
+from fastapi import APIRouter, Depends, Header, Path, Query, Request, status
 import httpx
 from app.core.db import get_database
-from app.models.schemas import CreateShowRequest, ShowResponse
+from app.models.schemas import CreateShowRequest, CreateShowResponse, ShowResponse
 from app.services.catalog_service import CatalogService
 
 router = APIRouter(prefix="/api/v1/catalog/shows", tags=["shows"])
@@ -31,14 +31,23 @@ async def get_shows(
     )
 
 
-@router.post("", response_model=ShowResponse, status_code=status.HTTP_201_CREATED)
+@router.get("/{show_id}", response_model=ShowResponse)
+async def get_show_by_id(
+    request: Request,
+    show_id: str = Path(..., min_length=1),
+    db=Depends(get_database),
+) -> ShowResponse:
+    return await _get_service(request, db).get_show_by_id(show_id=show_id)
+
+
+@router.post("", response_model=CreateShowResponse, status_code=status.HTTP_201_CREATED)
 async def create_show(
     payload: CreateShowRequest,
     request: Request,
     x_user_role: str | None = Header(default=None, alias="X-User-Role"),
     x_cinema_ids: str | None = Header(default=None, alias="X-Cinema-Ids"),
     db=Depends(get_database),
-) -> ShowResponse:
+) -> CreateShowResponse:
     return await _get_service(request, db).create_show(
         payload=payload,
         user_role=x_user_role,

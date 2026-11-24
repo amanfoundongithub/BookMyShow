@@ -61,6 +61,28 @@ class CatalogService:
             pass
         return []
 
+    async def _get_cinema_by_id(self, cinema_id: str) -> CinemaResponse | None:
+        doc = await self.db.cinemas.find_one(
+            {"$or": [{"cinema_id": cinema_id}, {"_id": cinema_id}]}
+        )
+        if doc:
+            return self._parse_cinema(doc)
+
+        if self.http_client is None:
+            return None
+
+        try:
+            resp = await self.http_client.get(
+                f"{self.settings.cinema_service_url.rstrip('/')}/api/v1/cinemas/{cinema_id}"
+            )
+            if resp.is_success:
+                payload = resp.json()
+                if isinstance(payload, dict):
+                    return self._parse_cinema(payload)
+        except httpx.RequestError:
+            pass
+        return None
+
     @staticmethod
     def _assert_can_manage_show(
         cinema_id: str,
@@ -143,6 +165,7 @@ class CatalogService:
         doc["_id"] = doc.pop("id")
         await self.db.shows.insert_one(doc)
         await cache_delete_pattern("catalog:shows:*")
+        await cache_delete_pattern("catalog:show:*")
         await cache_delete_pattern("catalog:movies:*")
         return CreateShowResponse(
             id=str(doc["_id"]),
@@ -155,3 +178,35 @@ class CatalogService:
             format=doc["format"],
             pricing=doc["pricing"],
         )
+
+    async def get_show_by_id(self, show_id: str) -> ShowResponse:
+        cache_key = f"catalog:show:{show_id}"
+        cached = await cache_get_json(cache_key)
+        if cached is not None:
+            return ShowResponse.model_validate(cached)
+
+        doc = await self.db.shows.find_one({"_id": show_id})
+        if doc is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Show '{show_id}' not found",
+            )
+
+        cinema = await self._get_cinema_by_id(str(doc["cinema_id"]))
+        response = ShowResponse(
+            id=str(doc["_id"]),
+            movie_id=doc["movie_id"],
+            cinema=cinema,
+            hall_id=doc["hall_id"],
+            start_time=doc["start_time"],
+            end_time=doc["end_time"],
+            language=doc["language"],
+            format=doc["format"],
+            pricing=doc["pricing"],
+        )
+        await cache_set_json(
+            cache_key,
+            response.model_dump(mode="json"),
+            self.settings.catalog_cache_ttl_seconds,
+        )
+        return response
