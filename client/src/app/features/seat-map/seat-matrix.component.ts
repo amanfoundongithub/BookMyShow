@@ -28,10 +28,11 @@ type VisualSeatState = 'AVAILABLE' | 'SELECTED' | 'HELD' | 'CONFIRMED';
 export class SeatMatrixComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly catalogService = inject(CatalogService);
   private readonly bookingService = inject(BookingService);
   private readonly hallService = inject(HallService);
   private readonly authService = inject(AuthService);
+  private readonly showService = inject(CatalogService);
+
   readonly wsService = inject(WsSeatService);
 
   readonly showId = signal<string>('');
@@ -61,7 +62,9 @@ export class SeatMatrixComponent implements OnInit, OnDestroy {
   private wsSub: Subscription | null = null;
 
   ngOnInit(): void {
-    const paramShowId = this.route.snapshot.paramMap.get('showId') ?? 'show_991823';
+
+    const paramShowId = this.route.snapshot.paramMap.get('showId') ??'';
+
     const queryHallId = this.route.snapshot.queryParamMap.get('hallId') ?? 'hall_audi_2';
     const rawPricing = this.route.snapshot.queryParamMap.get('pricing');
 
@@ -224,13 +227,15 @@ export class SeatMatrixComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
 
     forkJoin({
+      showDetails : this.showService.getShowDetailsById(this.showId()),
       layout: this.hallService.getHallLayout(this.hallId()),
       seatMap: this.bookingService.getSeatMap(this.showId(), this.hallId()),
     }).subscribe({
-      next: ({ layout, seatMap }) => {
+      next: ({ layout, seatMap, showDetails }) => {
         this.rows.set(layout.layout?.rows ?? []);
         this.seatStatuses.set({ ...(seatMap.seats ?? {}) });
         this.loading.set(false);
+        this.pricing.set(showDetails.pricing);
       },
       error: () => {
         this.loading.set(false);

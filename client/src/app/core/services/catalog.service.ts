@@ -41,6 +41,10 @@ export class CatalogService {
     return this.http.get<ShowSearchResponseItem[]>(`${this.baseUrl}/shows`, { params});
   }
 
+  getShowDetailsById(show_id : string) : Observable<ShowSearchResponseItem> {
+    return this.http.get<ShowSearchResponseItem>(`${this.baseUrl}/shows/${show_id}`);
+  }
+
   getHallLayout(hallId: string): Observable<HallLayoutResponse> {
     return this.http.get<HallLayoutResponse>(`${this.baseUrl}/halls/${hallId}/layout`);
   }
