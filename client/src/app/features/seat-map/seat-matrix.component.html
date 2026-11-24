@@ -1,33 +1,36 @@
 <div class="seat-page">
-  <!-- Header & Live Connection Status -->
-  <div class="top-bar">
+  <!-- Top Bar: Header & Live Connection Status -->
+  <header class="top-bar">
     <div>
       <h1 class="page-title">Select Seats</h1>
       <p class="page-subtitle">
-        Show: <span class="mono-pill">{{ showId() }}</span> • Hall:
-        <span class="mono-pill">{{ hallId() }}</span>
+        Show <span class="mono-pill">{{ showId() }}</span>
+        <span class="dot-divider">•</span>
+        Hall <span class="mono-pill">{{ hallId() }}</span>
       </p>
     </div>
 
     <div class="status-controls">
-      <span
+      <div
         class="ws-badge"
         [class.ws-badge--live]="wsService.connected()"
         [class.ws-badge--offline]="!wsService.connected()"
+        role="status"
+        aria-live="polite"
       >
         <span class="ws-dot"></span>
-        {{ wsService.connected() ? 'Live Seat Sync' : 'Connecting...' }}
-      </span>
+        <span>{{ wsService.connected() ? 'Live Sync' : 'Connecting...' }}</span>
+      </div>
 
       <app-hold-countdown
         [holdExpiresAt]="activeHold()?.hold_expires_at ?? null"
         (expired)="onHoldExpired()"
       />
     </div>
-  </div>
+  </header>
 
   <!-- Legend -->
-  <div class="legend-bar">
+  <nav class="legend-bar" aria-label="Seat status legend">
     <div class="legend-item">
       <span class="seat-swatch seat-swatch--available"></span>
       <span>Available</span>
@@ -38,86 +41,126 @@
     </div>
     <div class="legend-item">
       <span class="seat-swatch seat-swatch--held"></span>
-      <span>Held by Others</span>
+      <span>Reserved / In Cart</span>
     </div>
     <div class="legend-item">
       <span class="seat-swatch seat-swatch--confirmed"></span>
-      <span>Booked</span>
+      <span>Sold</span>
     </div>
-  </div>
+  </nav>
 
+  <!-- Alerts -->
   @if (errorMessage()) {
-    <div class="alert-error">{{ errorMessage() }}</div>
+    <div class="alert-error" role="alert">
+      <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+      </svg>
+      <span>{{ errorMessage() }}</span>
+    </div>
   }
 
   @if (infoMessage()) {
-    <div class="alert-info">{{ infoMessage() }}</div>
+    <div class="alert-info" role="status">
+      <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+      </svg>
+      <span>{{ infoMessage() }}</span>
+    </div>
   }
 
   @if (loading()) {
-    <div class="loading-box">Loading hall layout and live seat map...</div>
-  } @else {
-    <!-- Rows & Seats -->
-    <div class="hall-container">
-      @for (row of rows(); track row.row_label) {
-        <div class="seat-row">
-          <div class="row-meta">
-            <span class="row-label">{{ row.row_label }}</span>
-            <span class="row-tier">{{ row.tier ?? 'STANDARD' }}</span>
-          </div>
-
-          <div class="row-seats">
-            @for (slot of row.seats; track $index) {
-              @if (slot.type === 'AISLE') {
-                <div class="aisle-gap" aria-hidden="true"></div>
-              } @else if (slot.seat_number != null) {
-                @let tier = slot.tier ?? row.tier ?? 'STANDARD';
-                @let code = formatSeatCode(row.row_label, slot.seat_number);
-                @let state = getSeatVisualState(code);
-                <button
-                  type="button"
-                  class="seat-btn"
-                  [class.seat-btn--available]="state === 'AVAILABLE'"
-                  [class.seat-btn--selected]="state === 'SELECTED'"
-                  [class.seat-btn--held]="state === 'HELD'"
-                  [class.seat-btn--confirmed]="state === 'CONFIRMED'"
-                  [disabled]="isSeatDisabled(code, state)"
-                  (click)="toggleSeat(code, tier)"
-                  [title]="code + ' (' + tier + ') — ' + state"
-                >
-                  {{ slot.seat_number }}
-                </button>
-              }
-            }
-          </div>
-        </div>
-      }
-
-      <!-- Screen Indicator -->
-      <div class="screen-indicator">
-        <div class="screen-bar"></div>
-        <span class="screen-label">SCREEN THIS WAY</span>
-      </div>
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <p>Loading auditorium map & live seat statuses...</p>
     </div>
+  } @else {
+    <!-- Main Hall Matrix -->
+    <main class="hall-wrapper">
+      <div class="hall-matrix-scroll">
+        <div class="hall-matrix">
+          <!-- Aligned Screen Row -->
+          <div class="screen-row">
+            <div class="row-identifier" aria-hidden="true"></div>
+            <div class="screen-stage">
+              <div class="screen-glow"></div>
+              <div class="screen-curved-arc"></div>
+              <span class="screen-title">All eyes this way</span>
+            </div>
+            <div class="row-identifier row-identifier--mirror" aria-hidden="true"></div>
+          </div>
 
-    <!-- Bottom Action Bar -->
-    <div class="action-bar">
-      <div class="selection-summary">
+          <!-- Rows & Seats -->
+          @for (row of rows(); track row.row_label) {
+            <div class="seat-row">
+              <!-- Left Row Indicator -->
+              <div class="row-identifier" aria-hidden="true">
+                <span class="row-letter">{{ row.row_label }}</span>
+                <span class="row-badge">{{ row.tier ?? 'STD' }}</span>
+              </div>
+
+              <!-- Seat Slots -->
+              <div class="row-seats" role="row">
+                @for (slot of row.seats; track $index) {
+                  @if (slot.type === 'AISLE') {
+                    <div class="aisle-spacer" aria-hidden="true"></div>
+                  } @else if (slot.seat_number != null) {
+                    @let tier = slot.tier ?? row.tier ?? 'STANDARD';
+                    @let code = formatSeatCode(row.row_label, slot.seat_number);
+                    @let state = getSeatVisualState(code);
+
+                    <button
+                      type="button"
+                      class="seat-unit"
+                      [class.seat-unit--available]="state === 'AVAILABLE'"
+                      [class.seat-unit--selected]="state === 'SELECTED'"
+                      [class.seat-unit--held]="state === 'HELD'"
+                      [class.seat-unit--confirmed]="state === 'CONFIRMED'"
+                      [disabled]="isSeatDisabled(code, state)"
+                      (click)="toggleSeat(code, tier)"
+                      [attr.aria-pressed]="state === 'SELECTED'"
+                      [attr.aria-label]="code + ', ' + tier + ' tier, ' + state.toLowerCase()"
+                      [title]="code + ' • ' + tier + ' • ' + state"
+                    >
+                      <span class="seat-headrest"></span>
+                      <span class="seat-label">{{ slot.seat_number }}</span>
+                    </button>
+                  }
+                }
+              </div>
+
+              <!-- Right Row Mirror Indicator for Wide Auditoriums -->
+              <div class="row-identifier row-identifier--mirror" aria-hidden="true">
+                <span class="row-letter">{{ row.row_label }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </main>
+
+    <!-- Floating Action Summary Bar -->
+    <footer class="action-dock">
+      <div class="summary-details">
         @if (activeHold()) {
-          <p class="summary-title">
-            Hold <span class="mono-pill">{{ activeHold()!.booking_id }}</span> active for
-            <strong>{{ activeHold()!.seats.join(', ') }}</strong>
-          </p>
-          <p class="summary-sub">
-            Total: <strong>₹{{ activeHold()!.total_amount }} {{ activeHold()!.currency }}</strong>
+          <div class="summary-row">
+            <span class="tag-live">HOLD ACTIVE</span>
+            <span class="summary-seats">{{ activeHold()!.seats.join(', ') }}</span>
+          </div>
+          <p class="summary-price">
+            Total: <strong>₹{{ activeHold()!.total_amount }}</strong>
+            <span class="currency-code">{{ activeHold()!.currency }}</span>
           </p>
         } @else {
-          <p class="summary-title">
-            Selected:
-            <strong>{{ selectedSeats().length ? selectedSeats().join(', ') : 'None' }}</strong>
-          </p>
-          <p class="summary-sub">
-            Estimated Total: <strong>₹{{ estimatedTotal() }}</strong>
+          <div class="summary-row">
+            <span class="summary-seats">
+              {{ selectedSeats().length ? selectedSeats().join(', ') : 'No seats selected' }}
+            </span>
+            @if (selectedSeats().length) {
+              <span class="seat-counter">({{ selectedSeats().length }})</span>
+            }
+          </div>
+          <p class="summary-price">
+            Estimated: <strong>₹{{ estimatedTotal() }}</strong>
           </p>
         }
       </div>
@@ -130,7 +173,7 @@
             [disabled]="submitting()"
             (click)="releaseCurrentHold()"
           >
-            Release Hold
+            Release Seats
           </button>
           <button
             type="button"
@@ -146,10 +189,15 @@
             [disabled]="selectedSeats().length === 0 || submitting()"
             (click)="holdSelectedSeats()"
           >
-            {{ submitting() ? 'Locking Seats...' : 'Hold Seats' }}
+            @if (submitting()) {
+              <span class="btn-spinner"></span>
+              <span>Locking Seats...</span>
+            } @else {
+              <span>Hold Selected Seats</span>
+            }
           </button>
         }
       </div>
-    </div>
+    </footer>
   }
 </div>
