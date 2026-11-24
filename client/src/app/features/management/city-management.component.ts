@@ -16,7 +16,8 @@ import {
   styleUrl: './city-management.component.css',
 })
 export class CityManagementComponent implements OnInit {
-  private readonly cityApi = inject(CityService);
+
+  private readonly cityService = inject(CityService);
 
   readonly cities = signal<CityListItem[]>([]);
   readonly searchTerm = signal('');
@@ -33,7 +34,9 @@ export class CityManagementComponent implements OnInit {
 
   readonly filteredCities = computed(() => {
     const query = this.searchTerm().trim().toLowerCase();
-    if (!query) return this.cities();
+    if (!query) {
+      return this.cities();
+    }
     return this.cities().filter((city) =>
       [city.name, city.state, city.country, city.id]
         .some((value) => value.toLowerCase().includes(query))
@@ -48,7 +51,7 @@ export class CityManagementComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.cityApi.getAllCities().subscribe({
+    this.cityService.getAllCities().subscribe({
       next: (cities) => {
         this.cities.set(cities);
         this.loading.set(false);
@@ -77,7 +80,7 @@ export class CityManagementComponent implements OnInit {
 
     if (this.editingCityId()) {
       const payload: CityUpdateRequest = { name, state, country };
-      this.cityApi.updateCity(payload, this.editingCityId()!).subscribe({
+      this.cityService.updateCity(payload, this.editingCityId()!).subscribe({
         next: (updated) => {
           this.cities.update((cities) =>
             cities
@@ -97,7 +100,7 @@ export class CityManagementComponent implements OnInit {
     }
 
     const payload: CityCreateRequest = { id, name, state, country };
-    this.cityApi.createCity(payload).subscribe({
+    this.cityService.createCity(payload).subscribe({
       next: (created) => {
         this.cities.update((cities) =>
           [...cities, created].sort((a, b) => a.name.localeCompare(b.name))
@@ -132,7 +135,7 @@ export class CityManagementComponent implements OnInit {
 
   confirmDelete(city: CityListItem): void {
     this.deletingCityId.set(city.id);
-    this.cityApi.deleteCity(city.id).subscribe({
+    this.cityService.deleteCity(city.id).subscribe({
       next: () => {
         this.cities.update((cities) => cities.filter((item) => item.id !== city.id));
         this.deletingCityId.set(null);
@@ -153,4 +156,5 @@ export class CityManagementComponent implements OnInit {
     this.state.set('');
     this.country.set('India');
   }
+  
 }
