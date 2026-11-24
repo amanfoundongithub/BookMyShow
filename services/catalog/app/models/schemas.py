@@ -1,24 +1,31 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class CityResponse(BaseModel):
-    id: str
+class CinemaResponse(BaseModel):
+    cinema_id: str
     name: str
-    state: str
-    country: str
-
-
-class MovieResponse(BaseModel):
-    id: str
-    title: str
-    duration_minutes: int
-    rating: str
-    languages: list[str]
-    formats: list[str]
+    city_id: str
+    state: str | None = None
+    address: str
+    amenities: list[str] = Field(default_factory=list)
+    is_active: bool = True
+    created_at: datetime
 
 
 class ShowResponse(BaseModel):
+    id: str
+    movie_id: str
+    cinema: CinemaResponse | None = None
+    hall_id: str
+    start_time: datetime
+    end_time: datetime
+    language: str
+    format: str
+    pricing: dict[str, float]
+
+
+class CreateShowRequest(BaseModel):
     id: str
     movie_id: str
     cinema_id: str
@@ -30,7 +37,7 @@ class ShowResponse(BaseModel):
     pricing: dict[str, float]
 
 
-class CreateShowRequest(BaseModel):
+class CreateShowResponse(BaseModel):
     id: str
     movie_id: str
     cinema_id: str

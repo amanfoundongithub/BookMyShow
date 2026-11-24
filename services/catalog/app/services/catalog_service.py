@@ -5,9 +5,9 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.core.cache import cache_delete_pattern, cache_get_json, cache_set_json
 from app.core.config import get_settings
 from app.models.schemas import (
-    CityResponse,
+    CinemaResponse,
     CreateShowRequest,
-    MovieResponse,
+    CreateShowResponse,
     ShowResponse,
 )
 
@@ -22,17 +22,26 @@ class CatalogService:
         self.http_client = http_client
         self.settings = get_settings()
 
-    async def _get_cinema_ids_for_city(self, city_id: str) -> list[str]:
-        docs = await self.db.cinemas.find(
-            {"city_id": city_id}, {"_id": 1, "cinema_id": 1}
-        ).to_list(length=500)
-        ids = [
-            str(doc.get("cinema_id") or doc.get("_id"))
+    @staticmethod
+    def _parse_cinema(raw: dict) -> CinemaResponse | None:
+        data = dict(raw)
+        cinema_id = data.get("cinema_id") or data.get("_id")
+        if not cinema_id:
+            return None
+        data["cinema_id"] = str(cinema_id)
+        if not data.get("created_at"):
+            data["created_at"] = datetime.now(timezone.utc)
+        return CinemaResponse.model_validate(data)
+
+    async def _get_cinemas_for_city(self, city_id: str) -> list[CinemaResponse]:
+        docs = await self.db.cinemas.find({"city_id": city_id}).to_list(length=500)
+        cinemas = [
+            parsed
             for doc in docs
-            if doc.get("cinema_id") or doc.get("_id")
+            if (parsed := self._parse_cinema(doc)) is not None
         ]
-        if ids or self.http_client is None:
-            return ids
+        if cinemas or self.http_client is None:
+            return cinemas
 
         try:
             resp = await self.http_client.get(
@@ -41,11 +50,13 @@ class CatalogService:
             )
             if resp.is_success:
                 payload = resp.json()
-                return [
-                    str(item["cinema_id"])
-                    for item in payload
-                    if isinstance(item, dict) and item.get("cinema_id")
-                ]
+                if isinstance(payload, list):
+                    return [
+                        parsed
+                        for item in payload
+                        if isinstance(item, dict)
+                        and (parsed := self._parse_cinema(item)) is not None
+                    ]
         except httpx.RequestError:
             pass
         return []
@@ -74,63 +85,6 @@ class CatalogService:
             detail="Insufficient permissions to create shows",
         )
 
-    async def list_cities(self) -> list[CityResponse]:
-        cache_key = "catalog:cities"
-        cached = await cache_get_json(cache_key)
-        if cached is not None:
-            return [CityResponse.model_validate(item) for item in cached]
-
-        docs = await self.db.cities.find().sort("name", 1).to_list(length=200)
-        result = [
-            CityResponse(
-                id=doc["_id"],
-                name=doc["name"],
-                state=doc["state"],
-                country=doc.get("country", "India"),
-            )
-            for doc in docs
-        ]
-        await cache_set_json(
-            cache_key,
-            [item.model_dump() for item in result],
-            self.settings.catalog_cache_ttl_seconds,
-        )
-        return result
-
-    async def list_movies_by_city(self, city_id: str) -> list[MovieResponse]:
-        cache_key = f"catalog:movies:city:{city_id}"
-        cached = await cache_get_json(cache_key)
-        if cached is not None:
-            return [MovieResponse.model_validate(item) for item in cached]
-
-        cinema_ids = await self._get_cinema_ids_for_city(city_id)
-        if not cinema_ids:
-            return []
-
-        now = datetime.now(timezone.utc)
-        movie_ids = await self.db.shows.distinct(
-            "movie_id",
-            {"cinema_id": {"$in": cinema_ids}, "start_time": {"$gte": now}},
-        )
-        docs = await self.db.movies.find({"_id": {"$in": movie_ids}}).to_list(length=200)
-        result = [
-            MovieResponse(
-                id=doc["_id"],
-                title=doc["title"],
-                duration_minutes=doc["duration_minutes"],
-                rating=doc["rating"],
-                languages=doc.get("languages", []),
-                formats=doc.get("formats", []),
-            )
-            for doc in docs
-        ]
-        await cache_set_json(
-            cache_key,
-            [item.model_dump() for item in result],
-            self.settings.catalog_cache_ttl_seconds,
-        )
-        return result
-
     async def list_shows(
         self, movie_id: str, date_str: str, city_id: str
     ) -> list[ShowResponse]:
@@ -139,7 +93,9 @@ class CatalogService:
         if cached is not None:
             return [ShowResponse.model_validate(item) for item in cached]
 
-        cinema_ids = await self._get_cinema_ids_for_city(city_id)
+        cinema_objects = await self._get_cinemas_for_city(city_id)
+        cinemas_by_id = {cinema.cinema_id: cinema for cinema in cinema_objects}
+        cinema_ids = list(cinemas_by_id.keys())
         if not cinema_ids:
             return []
 
@@ -157,9 +113,9 @@ class CatalogService:
         docs = await cursor.to_list(length=500)
         result = [
             ShowResponse(
-                id=doc["_id"],
+                id=str(doc["_id"]),
                 movie_id=doc["movie_id"],
-                cinema_id=doc["cinema_id"],
+                cinema=cinemas_by_id.get(str(doc["cinema_id"])),
                 hall_id=doc["hall_id"],
                 start_time=doc["start_time"],
                 end_time=doc["end_time"],
@@ -181,15 +137,15 @@ class CatalogService:
         payload: CreateShowRequest,
         user_role: str | None = None,
         allowed_cinema_ids: list[str] | None = None,
-    ) -> ShowResponse:
+    ) -> CreateShowResponse:
         self._assert_can_manage_show(payload.cinema_id, user_role, allowed_cinema_ids)
         doc = payload.model_dump()
         doc["_id"] = doc.pop("id")
         await self.db.shows.insert_one(doc)
         await cache_delete_pattern("catalog:shows:*")
         await cache_delete_pattern("catalog:movies:*")
-        return ShowResponse(
-            id=doc["_id"],
+        return CreateShowResponse(
+            id=str(doc["_id"]),
             movie_id=doc["movie_id"],
             cinema_id=doc["cinema_id"],
             hall_id=doc["hall_id"],
