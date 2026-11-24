@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { City, Movie, Show } from '../../models/bms.models';
+import { CityService } from '../../core/services/city.service';
 
 @Component({
   selector: 'app-show-selection',
@@ -14,7 +15,10 @@ import { City, Movie, Show } from '../../models/bms.models';
   styleUrl: './show-selection.component.css',
 })
 export class ShowSelectionComponent implements OnInit {
+
   private readonly catalogService = inject(CatalogService);
+  private readonly cityService    = inject(CityService);
+
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -61,7 +65,7 @@ export class ShowSelectionComponent implements OnInit {
     this.selectedMovie.set(null);
     this.movies.set([]);
     this.shows.set([]);
-  }
+  };
 
   onCityChange(cityId: string): void {
     this.selectedCityId.set(cityId);
@@ -99,26 +103,6 @@ export class ShowSelectionComponent implements OnInit {
     });
   }
 
-  private loadCities(): void {
-    this.errorMessage.set(null);
-    this.catalogService.getCities().subscribe({
-      next: (cities) => {
-        this.cities.set(cities);
-        const preferredCity =
-          cities.find((c) => c.id === 'city_hyd') ?? cities[0] ?? null;
-
-        if (preferredCity) {
-          this.selectedState.set(preferredCity.state);
-          this.selectedCityId.set(preferredCity.id);
-          this.loadMovies(preferredCity.id);
-        }
-      },
-      error: () => {
-        this.errorMessage.set('Failed to load cities from Catalog Service.');
-      },
-    });
-  }
-
   private loadMovies(cityId: string): void {
     this.loadingMovies.set(true);
     this.errorMessage.set(null);
@@ -152,4 +136,19 @@ export class ShowSelectionComponent implements OnInit {
         },
       });
   }
+
+  // Load cities
+  private loadCities() : void {
+    this.errorMessage.set(null);
+    this.cityService.getAllCities().subscribe({
+      next : (cities) => {
+        this.cities.set(cities);
+      },
+      error : (err) => {
+        console.log("Error in fetching cities data:", err);
+        this.errorMessage.set("Error occured while fetching cities data. Please try again.");
+      }
+    })
+  };
+
 }
