@@ -1,12 +1,9 @@
-// Item for city list 
 export interface CityListItem {
     id : string,
     name : string,
     state : string,
     country : string
 };
-
-// City create request & response
 
 export interface CityCreateRequest {
     id : string,
@@ -20,6 +17,17 @@ export interface CityCreateResponse {
     name : string,
     state : string,
     country : string
-}
+};
 
-// City update request & response
+export interface CityUpdateRequest {
+    name? : string, 
+    state? : string,
+    country? : string
+};
+
+export interface CityUpdateResponse {
+    id : string,
+    name : string,
+    state : string,
+    country : string
+}
