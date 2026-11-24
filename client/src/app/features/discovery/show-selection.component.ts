@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
-import { City, Movie, Show } from '../../models/bms.models';
+import { City, Movie } from '../../models/bms.models';
 import { CityService } from '../../core/services/city.service';
 import { ShowSearchResponseItem } from '../../models/show.models';
 
