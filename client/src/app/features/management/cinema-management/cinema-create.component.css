@@ -1,0 +1,199 @@
+@reference "tailwindcss";
+
+:host {
+  display: block;
+}
+
+.cinema-create-container {
+  @apply max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-6;
+}
+
+/* Header & Metadata */
+.cinema-header {
+  @apply flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-white/10;
+}
+
+.header-text-group {
+  @apply space-y-1.5;
+}
+
+.header-badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 tracking-wide uppercase border border-indigo-100;
+}
+
+.badge-dot {
+  @apply h-1.5 w-1.5 rounded-full bg-indigo-600;
+}
+
+.cinema-title {
+  @apply text-2xl sm:text-3xl font-extrabold tracking-tight text-white;
+}
+
+.cinema-subtitle {
+  @apply text-sm text-slate-300 max-w-xl leading-relaxed;
+}
+
+.header-actions {
+  @apply flex flex-wrap items-center gap-2.5 shrink-0;
+}
+
+.action-btn-secondary {
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-[0.98] transition;
+}
+
+.action-btn-primary {
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 active:scale-[0.98] transition;
+}
+
+.btn-icon {
+  @apply w-3.5 h-3.5 text-slate-500;
+}
+
+.btn-icon-right {
+  @apply w-3.5 h-3.5;
+}
+
+/* Notifications */
+.alert {
+  @apply rounded-xl border p-4 shadow-sm flex items-start gap-3 transition-all;
+}
+
+.alert-error {
+  @apply border-rose-200 bg-rose-50 text-rose-800;
+}
+
+.alert-success {
+  @apply border-emerald-200 bg-emerald-50 text-emerald-900 justify-between items-center;
+}
+
+.alert-body {
+  @apply flex items-center gap-3;
+}
+
+.success-icon-wrap {
+  @apply p-1 bg-emerald-100 rounded-full shrink-0;
+}
+
+.alert-icon {
+  @apply w-5 h-5 shrink-0 text-rose-500;
+}
+
+.alert-title {
+  @apply text-xs font-bold uppercase tracking-wider mb-0.5;
+}
+
+.alert-message {
+  @apply text-sm font-medium leading-normal;
+}
+
+.cinema-id-code {
+  @apply font-mono text-xs font-bold bg-white border border-emerald-300 text-emerald-950 px-2 py-0.5 rounded-md;
+}
+
+.action-btn-success {
+  @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded-lg shadow-sm hover:bg-emerald-700 transition shrink-0;
+}
+
+/* Card & Form Container */
+.cinema-card {
+  @apply bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden;
+}
+
+.card-section {
+  @apply p-6 sm:p-8 space-y-6;
+}
+
+.section-heading {
+  @apply pb-4 border-b border-slate-100;
+}
+
+.section-title {
+  @apply text-base font-semibold text-slate-900 tracking-tight;
+}
+
+.section-desc {
+  @apply text-xs text-slate-500 mt-0.5;
+}
+
+.form-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5;
+}
+
+/* Input Fields */
+.field-label {
+  @apply block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5;
+}
+
+.field-hint {
+  @apply font-normal normal-case text-slate-400 lowercase ml-1;
+}
+
+.required-mark {
+  @apply text-rose-500;
+}
+
+.input-wrap {
+  @apply relative;
+}
+
+.field-input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:border-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-500/10;
+}
+
+.field-select {
+  @apply appearance-none pr-9;
+}
+
+.select-chevron {
+  @apply pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3;
+}
+
+.textarea-input {
+  @apply resize-none leading-relaxed;
+}
+
+/* Footer & Controls */
+.card-footer {
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-100;
+}
+
+.toggle-control {
+  @apply inline-flex items-center gap-3 cursor-pointer select-none;
+}
+
+.toggle-switch {
+  @apply relative inline-block w-11 h-6 bg-slate-300 rounded-full transition-colors duration-200;
+}
+
+.toggle-switch::after {
+  content: "";
+  @apply absolute top-[2px] left-[2px] h-5 w-5 rounded-full border border-slate-300 bg-white transition-transform duration-200;
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+  @apply bg-indigo-600;
+}
+
+.toggle-checkbox:checked + .toggle-switch::after {
+  @apply translate-x-[20px] border-white;
+}
+
+.toggle-checkbox:focus-visible + .toggle-switch {
+  @apply outline-none ring-4 ring-indigo-500/20;
+}
+
+.toggle-labels {
+  @apply flex flex-col;
+}
+
+.toggle-title {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.toggle-description {
+  @apply text-xs text-slate-500;
+}
+
+.submit-btn {
+  @apply inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none transition cursor-pointer;
+}
