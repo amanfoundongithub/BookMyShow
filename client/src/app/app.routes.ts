@@ -40,6 +40,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'movies',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+        loadComponent: () =>
+          import('./features/management/movie-management/movie-management.component').then(
+            (m) => m.MovieManagementComponent
+          ),
+      },
+      {
         path: 'halls',
         loadComponent: () =>
           import('./features/management/hall-layout-builder.component').then(
