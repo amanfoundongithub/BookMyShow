@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { HallService } from '../../core/services/hall.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { HallService } from '../../../core/services/hall.service';
 import {
   CinemaSummary,
   HallLayoutResponse,
   HallRow,
   SeatSlot,
   SeatType,
-} from '../../models/bms.models';
+} from '../../../models/bms.models';
 
 interface HallLayoutState {
   rows: HallRow[];
