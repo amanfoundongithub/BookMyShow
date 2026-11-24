@@ -1,39 +1,13 @@
 from datetime import date
-from enum import StrEnum
 from pydantic import BaseModel, Field
-
-
-class MovieLanguage(StrEnum):
-    ENGLISH = "English"
-    HINDI = "Hindi"
-    TELUGU = "Telugu"
-    TAMIL = "Tamil"
-    KANNADA = "Kannada"
-    MALAYALAM = "Malayalam"
-
-
-class MovieFormat(StrEnum):
-    TWO_D = "2D"
-    THREE_D = "3D"
-    IMAX_2D = "IMAX 2D"
-    IMAX_3D = "IMAX 3D"
-    FOUR_DX = "4DX"
-    DOLBY_ATMOS = "Dolby Atmos"
-
-
-class ContentRating(StrEnum):
-    U = "U"
-    UA = "UA"
-    A = "A"
-    S = "S"
 
 
 class MovieBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     duration_minutes: int = Field(..., gt=0, le=600)
-    rating: ContentRating = ContentRating.UA
-    languages: list[MovieLanguage] = Field(default_factory=lambda: [MovieLanguage.ENGLISH])
-    formats: list[MovieFormat] = Field(default_factory=lambda: [MovieFormat.TWO_D])
+    rating: str = "UA"
+    languages: list[str] = Field(default_factory=lambda: ["English"])
+    formats: list[str] = Field(default_factory=lambda: ["2D"])
     synopsis: str | None = None
     city_ids: list[str] = Field(default_factory=list)
     release_date: date | None = None
@@ -48,9 +22,9 @@ class MovieCreate(MovieBase):
 class MovieUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     duration_minutes: int | None = Field(default=None, gt=0, le=600)
-    rating: ContentRating | None = None
-    languages: list[MovieLanguage] | None = None
-    formats: list[MovieFormat] | None = None
+    rating: str | None = None
+    languages: list[str] | None = None
+    formats: list[str] | None = None
     synopsis: str | None = None
     city_ids: list[str] | None = None
     release_date: date | None = None

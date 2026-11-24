@@ -5,6 +5,7 @@ from uuid import uuid4
 from fastapi import HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo.errors import DuplicateKeyError
+from app.core.movie_options import MOVIE_OPTIONS_ID
 from app.models.schemas import (
     MovieCreate,
     MovieResponse,
@@ -39,6 +40,47 @@ class MovieService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only ADMIN users can manage movies",
             )
+
+    async def get_movie_options(self) -> dict[str, list[str]]:
+        doc = await self.db.movie_metadata.find_one({"_id": MOVIE_OPTIONS_ID})
+        if not doc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Movie options are not initialized",
+            )
+
+        options: dict[str, list[str]] = {}
+        for field in ("languages", "formats", "ratings"):
+            values = doc.get(field)
+            if not isinstance(values, list) or any(
+                not isinstance(value, str) or not value.strip() for value in values
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail=f"Movie option list '{field}' is missing or invalid",
+                )
+            options[field] = values
+        return options
+
+    @staticmethod
+    def _validate_movie_options(
+        options: dict[str, list[str]],
+        rating: str | None = None,
+        languages: list[str] | None = None,
+        formats: list[str] | None = None,
+    ) -> None:
+        supplied = {
+            "ratings": [rating] if rating is not None else [],
+            "languages": languages or [],
+            "formats": formats or [],
+        }
+        for category, values in supplied.items():
+            unsupported = [value for value in values if value not in options[category]]
+            if unsupported:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Unsupported {category[:-1]} value(s): {', '.join(unsupported)}",
+                )
 
     async def list_movies(
         self,
@@ -76,6 +118,13 @@ class MovieService:
 
     async def create_movie(self, payload: MovieCreate, user_role: str | None) -> MovieResponse:
         self._assert_admin(user_role)
+        options = await self.get_movie_options()
+        self._validate_movie_options(
+            options,
+            rating=payload.rating,
+            languages=payload.languages,
+            formats=payload.formats,
+        )
         movie_id = payload.id or f"mov_{uuid4().hex[:10]}"
         doc: dict[str, Any] = {
             "_id": movie_id,
@@ -104,6 +153,13 @@ class MovieService:
 
         updates = payload.model_dump(mode="json", exclude_unset=True, exclude_none=True)
         if updates:
+            options = await self.get_movie_options()
+            self._validate_movie_options(
+                options,
+                rating=updates.get("rating"),
+                languages=updates.get("languages"),
+                formats=updates.get("formats"),
+            )
             await self.db.movies.update_one({"_id": movie_id}, {"$set": updates})
 
         updated = await self.db.movies.find_one({"_id": movie_id})

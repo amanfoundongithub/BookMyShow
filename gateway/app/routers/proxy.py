@@ -251,6 +251,42 @@ async def proxy_halls(request: Request, path: str) -> Response:
 
 
 @router.api_route(
+    "/api/v1/cities",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+@router.api_route(
+    "/api/v1/cities/",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_cities_root(request: Request) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.city_service_url,
+        path="/api/v1/cities",
+        require_auth=is_write,
+        allowed_roles={"ADMIN"} if is_write else None,
+    )
+
+
+@router.api_route(
+    "/api/v1/cities/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
+async def proxy_cities(request: Request, path: str) -> Response:
+    settings = get_settings()
+    is_write = request.method != "GET"
+    return await _proxy_http(
+        request=request,
+        target_base_url=settings.city_service_url,
+        path=f"/api/v1/cities/{path}",
+        require_auth=is_write,
+        allowed_roles={"ADMIN"} if is_write else None,
+    )
+
+
+@router.api_route(
     "/api/v1/movies",
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
 )
@@ -293,6 +329,14 @@ async def proxy_movies(request: Request, path: str) -> Response:
 async def proxy_catalog(request: Request, path: str) -> Response:
     settings = get_settings()
     is_write = request.method != "GET"
+    if path.strip("/") == "cities":
+        return await _proxy_http(
+            request=request,
+            target_base_url=settings.city_service_url,
+            path="/api/v1/cities",
+            require_auth=is_write,
+            allowed_roles={"ADMIN"} if is_write else None,
+        )
     return await _proxy_http(
         request=request,
         target_base_url=settings.catalog_service_url,

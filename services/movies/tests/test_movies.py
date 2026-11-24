@@ -1,13 +1,15 @@
 from copy import deepcopy
 import re
 from typing import Any
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 from bson import BSON
 from httpx import ASGITransport, AsyncClient
 from pymongo.errors import DuplicateKeyError
-from app.core.db import get_database
+from app.core.db import close_db, connect_db, get_database
+from app.core.movie_options import DEFAULT_MOVIE_OPTIONS, MOVIE_OPTIONS_ID
 from app.main import app
 
 
@@ -88,11 +90,25 @@ class FakeCollection:
 class FakeDatabase:
     def __init__(self) -> None:
         self.movies = FakeCollection()
+        self.movie_metadata = FakeCollection()
+        self.movie_metadata.docs = [
+            {
+                "_id": "movie_options",
+                "languages": ["English", "Hindi", "Telugu", "Tamil", "Kannada", "Malayalam"],
+                "formats": ["2D", "3D", "IMAX 2D", "IMAX 3D", "4DX", "Dolby Atmos"],
+                "ratings": ["U", "UA", "A", "S"],
+            }
+        ]
+
+
+@pytest.fixture
+def fake_db() -> FakeDatabase:
+    return FakeDatabase()
 
 
 @pytest_asyncio.fixture
-async def client():
-    db = FakeDatabase()
+async def client(fake_db: FakeDatabase):
+    db = fake_db
     app.dependency_overrides[get_database] = lambda: db
     with patch("app.main.connect_db"), patch("app.main.close_db"):
         async with AsyncClient(
@@ -197,3 +213,74 @@ async def test_movie_list_filters_city_language_format_and_active_status(
         "mov_city",
         "mov_inactive",
     }
+
+
+@pytest.mark.asyncio
+async def test_movie_options_are_read_from_mongodb_and_allow_custom_values(
+    client: AsyncClient,
+    fake_db: FakeDatabase,
+) -> None:
+    options = fake_db.movie_metadata.docs[0]
+    options["languages"] = ["Japanese"]
+    options["formats"] = ["ScreenX"]
+    options["ratings"] = ["PG-13"]
+
+    response = await client.get("/api/v1/movies/meta")
+    assert response.status_code == 200
+    assert response.json() == {
+        "languages": ["Japanese"],
+        "formats": ["ScreenX"],
+        "ratings": ["PG-13"],
+    }
+
+    created = await client.post(
+        "/api/v1/movies",
+        headers={"X-User-Role": "ADMIN"},
+        json={
+            "id": "mov_custom",
+            "title": "Custom Options",
+            "duration_minutes": 100,
+            "rating": "PG-13",
+            "languages": ["Japanese"],
+            "formats": ["ScreenX"],
+        },
+    )
+    assert created.status_code == 201
+
+    invalid = await client.post(
+        "/api/v1/movies",
+        headers={"X-User-Role": "ADMIN"},
+        json={
+            "id": "mov_invalid",
+            "title": "Unsupported Option",
+            "duration_minutes": 100,
+            "languages": ["English"],
+        },
+    )
+    assert invalid.status_code == 422
+    assert (await client.post("/api/v1/movies/meta")).status_code == 405
+
+
+@pytest.mark.asyncio
+async def test_startup_seeds_movie_options_only_when_missing() -> None:
+    database = SimpleNamespace(movies=AsyncMock(), movie_metadata=AsyncMock())
+    mongo_client = MagicMock()
+    mongo_client.__getitem__.return_value = database
+
+    with (
+        patch(
+            "app.core.db.get_settings",
+            return_value=SimpleNamespace(
+                mongo_uri="mongodb://localhost",
+                mongo_db_name="BookMyShow",
+            ),
+        ),
+        patch("app.core.db.AsyncIOMotorClient", return_value=mongo_client),
+    ):
+        await connect_db()
+        database.movie_metadata.update_one.assert_awaited_once_with(
+            {"_id": MOVIE_OPTIONS_ID},
+            {"$setOnInsert": DEFAULT_MOVIE_OPTIONS},
+            upsert=True,
+        )
+        await close_db()

@@ -1,13 +1,6 @@
 from fastapi import APIRouter, Depends, Header, Query, status
 from app.core.db import get_database
-from app.models.schemas import (
-    ContentRating,
-    MovieCreate,
-    MovieFormat,
-    MovieLanguage,
-    MovieResponse,
-    MovieUpdate,
-)
+from app.models.schemas import MovieCreate, MovieResponse, MovieUpdate
 from app.services.movie_service import MovieService
 
 router = APIRouter(prefix="/api/v1/movies", tags=["movies"])
@@ -17,13 +10,11 @@ def get_movie_service(db=Depends(get_database)) -> MovieService:
     return MovieService(db=db)
 
 
-@router.get("/meta", summary="List supported movie enums")
-async def get_movie_enums() -> dict[str, list[str]]:
-    return {
-        "languages": [item.value for item in MovieLanguage],
-        "formats": [item.value for item in MovieFormat],
-        "ratings": [item.value for item in ContentRating],
-    }
+@router.get("/meta", summary="List supported movie options")
+async def get_movie_options(
+    service: MovieService = Depends(get_movie_service),
+) -> dict[str, list[str]]:
+    return await service.get_movie_options()
 
 
 @router.get("", response_model=list[MovieResponse])

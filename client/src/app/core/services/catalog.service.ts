@@ -22,7 +22,7 @@ export class CatalogService {
   private readonly baseUrl = `${environment.apiBaseUrl}/api/v1/catalog`;
 
   getCities(): Observable<City[]> {
-    return this.http.get<City[]>(`${this.baseUrl}/cities`);
+    return this.http.get<City[]>(`${environment.apiBaseUrl}/api/v1/cities`);
   }
 
   getMoviesByCity(cityId: string): Observable<Movie[]> {

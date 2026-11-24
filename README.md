@@ -14,17 +14,24 @@ and event-driven notification handling.
 | Cinema service | 8005 | Cinema management |
 | Hall service | 8006 | Hall and seat-layout management |
 | Movie service | 8007 | Movie metadata management |
-| Catalog service | 8001 | Cities, cinemas, halls, movies, and showtimes |
+| City service | 8008 | City metadata management |
+| Catalog service | 8001 | Discovery and showtime APIs |
 | Booking service | 8002 | Seat maps, temporary seat holds, and booking state |
 | Payment service | 8003 | Payment intents and webhook processing using a mock gateway |
 | Notification worker | — | Consumes booking/payment events from RabbitMQ |
 
 The gateway routes client requests to the services. User, catalog, booking,
-payment, cinema, hall, and movie data use the shared MongoDB database configured
-by `MONGO_DB_NAME` (default: `BookMyShow`). The catalog serves cities and
-showtimes; booking and payment store bookings and transactions. Redis backs
-catalog caching and seat holds. RabbitMQ carries booking/payment events to the
-notification worker.
+payment, cinema, hall, movie, and city data use the shared MongoDB database
+configured by `MONGO_DB_NAME` (default: `BookMyShow`). City, cinema, hall, and
+movie metadata are managed by their respective services; Catalog serves
+discovery and showtimes. Redis backs catalog caching and seat holds. RabbitMQ
+carries booking/payment events to the notification worker.
+
+The Movie Service stores supported languages, formats, and ratings in the
+`movie_metadata` collection (`_id: "movie_options"`). It seeds the defaults only
+when that document does not exist. Customize the three arrays directly in
+MongoDB; `GET /api/v1/movies/meta` returns the current values, and there is no
+API endpoint for changing them.
 
 ## Requirements
 
@@ -47,6 +54,7 @@ notification worker.
      -r services/booking/requirements.txt \
      -r services/payment/requirements.txt \
      -r services/movies/requirements.txt \
+     -r services/cities/requirements.txt \
      -r services/notification/requirements.txt \
      -r services/user/requirements.txt
    ```
@@ -77,6 +85,16 @@ notification worker.
    .venv/bin/python scripts/seed_db.py
    ```
 
+   To seed the default movie languages, formats, and ratings explicitly, run:
+
+   ```bash
+   .venv/bin/python scripts/seed_movie_options.py
+   ```
+
+   This only inserts the default options when the `movie_options` document is
+   missing; it does not overwrite customized values. The Movie Service also
+   initializes the defaults automatically on startup.
+
 4. Start the backend services and notification worker:
 
    ```bash
@@ -84,8 +102,8 @@ notification worker.
    ```
 
    The script starts the user, gateway, catalog, booking, payment, cinema, hall,
-   and movie APIs with reload enabled, plus the notification worker. Press
-   **Ctrl-C** to stop them.
+   movie, and city APIs with reload enabled, plus the notification worker.
+   Press **Ctrl-C** to stop them.
 
 5. In another terminal, install and start the Angular client:
 
@@ -100,7 +118,8 @@ notification worker.
 The HTTP APIs expose interactive documentation at
 `http://localhost:8000/docs` (gateway), `http://localhost:8001/docs` (catalog),
 `http://localhost:8002/docs` (booking), `http://localhost:8003/docs` (payment),
-`http://localhost:8004/docs` (user), and `http://localhost:8007/docs` (movies).
+`http://localhost:8004/docs` (user), `http://localhost:8007/docs` (movies),
+and `http://localhost:8008/docs` (cities).
 Register and log in through
 `POST /api/v1/auth/register` and `POST /api/v1/auth/login`; use the returned
 Bearer token for protected routes such as `GET /api/v1/users/me` and

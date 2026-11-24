@@ -1,5 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.core.config import get_settings
+from app.core.movie_options import DEFAULT_MOVIE_OPTIONS, MOVIE_OPTIONS_ID
 
 _client: AsyncIOMotorClient | None = None
 
@@ -11,6 +12,11 @@ async def connect_db() -> None:
     db = get_database()
     await db.movies.create_index("title")
     await db.movies.create_index("city_ids")
+    await db.movie_metadata.update_one(
+        {"_id": MOVIE_OPTIONS_ID},
+        {"$setOnInsert": DEFAULT_MOVIE_OPTIONS},
+        upsert=True,
+    )
 
 
 async def close_db() -> None:
