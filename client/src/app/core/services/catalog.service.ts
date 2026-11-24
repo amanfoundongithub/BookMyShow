@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { City, HallLayoutResponse, Movie, Show } from '../../models/bms.models';
+import { MovieRecord } from '../../models/movie.models';
 
 export interface CreateShowPayload {
   id?: string;
@@ -16,7 +17,9 @@ export interface CreateShowPayload {
   pricing: Record<string, number>;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ 
+  providedIn: 'root' 
+})
 export class CatalogService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/api/v1/catalog`;
@@ -25,9 +28,8 @@ export class CatalogService {
     return this.http.get<City[]>(`${environment.apiBaseUrl}/api/v1/cities`);
   }
 
-  getMoviesByCity(cityId: string): Observable<Movie[]> {
-    const params = new HttpParams().set('city', cityId);
-    return this.http.get<Movie[]>(`${this.baseUrl}/movies`, { params });
+  getAllMoviesByCity(cityId : string) : Observable<MovieRecord[]> {
+    return this.http.get<MovieRecord[]>(`${environment.apiBaseUrl}/api/v1/movies?city=${cityId}&active_only=true`);
   }
 
   getShows(movieId: string, date: string, cityId: string): Observable<Show[]> {

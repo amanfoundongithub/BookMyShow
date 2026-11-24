@@ -106,7 +106,7 @@ export class ShowSelectionComponent implements OnInit {
   private loadMovies(cityId: string): void {
     this.loadingMovies.set(true);
     this.errorMessage.set(null);
-    this.catalogService.getMoviesByCity(cityId).subscribe({
+    this.catalogService.getAllMoviesByCity(cityId).subscribe({
       next: (movies) => {
         this.movies.set(movies);
         this.loadingMovies.set(false);
