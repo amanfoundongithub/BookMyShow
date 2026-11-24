@@ -51,7 +51,7 @@ export const routes: Routes = [
       {
         path: 'halls',
         loadComponent: () =>
-          import('./features/management/hall-layout-builder.component').then(
+          import('./features/management/hall-management/hall-layout-builder.component').then(
             (m) => m.HallLayoutBuilderComponent
           ),
       },
