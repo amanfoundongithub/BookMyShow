@@ -1,128 +1,194 @@
 <div class="selection-page">
-  <!-- Top Bar: Cascading State -> City Selector & Auth Status -->
-  <section class="toolbar-card">
-    <div class="location-controls">
-      <div class="selector-group">
-        <label for="stateSelect" class="field-label">1. State</label>
-        <select
-          id="stateSelect"
-          class="control-input location-select"
-          [ngModel]="selectedState()"
-          (ngModelChange)="onStateChange($event)"
-        >
-          <option value="">Select a state...</option>
-          @for (st of states(); track st) {
-            <option [value]="st">{{ st }}</option>
-          }
-        </select>
+  <!-- Ambient background glow accents -->
+  <div class="ambient-glow -top-32 -left-32 bg-rose-600/10"></div>
+  <div class="ambient-glow top-1/2 -right-32 bg-indigo-600/10"></div>
+
+  <!-- Top Navigation / Location & Auth Ribbon -->
+  <section class="toolbar-bar">
+    <div class="location-cluster">
+      <div class="location-icon-wrapper">
+        <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
       </div>
 
-      @if (selectedState()) {
-        <div class="selector-group">
-          <label for="citySelect" class="field-label">2. City</label>
+      <!-- State Picker -->
+      <div class="input-field-group">
+        <label for="stateSelect" class="field-mini-label">State</label>
+        <div class="select-wrapper">
+          <select
+            id="stateSelect"
+            class="custom-select"
+            [ngModel]="selectedState()"
+            (ngModelChange)="onStateChange($event)"
+          >
+            <option value="">Select State</option>
+            @for (st of states(); track st) {
+              <option [value]="st">{{ st }}</option>
+            }
+          </select>
+          <svg class="select-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+
+      <span class="location-divider">/</span>
+
+      <!-- City Picker -->
+      <div class="input-field-group">
+        <label for="citySelect" class="field-mini-label">City</label>
+        <div class="select-wrapper">
           <select
             id="citySelect"
-            class="control-input location-select"
+            class="custom-select"
+            [disabled]="!selectedState()"
             [ngModel]="selectedCityId()"
             (ngModelChange)="onCityChange($event)"
           >
-            <option value="">Select a city...</option>
+            <option value="">{{ selectedState() ? 'Select City' : 'Pick State First' }}</option>
             @for (city of citiesInSelectedState(); track city.id) {
               <option [value]="city.id">{{ city.name }}</option>
             }
           </select>
+          <svg class="select-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </div>
-      }
+      </div>
     </div>
 
     @if (!authService.isAuthenticated()) {
-      <div class="auth-nudge">
-        <span class="nudge-text">Sign in to lock seats and complete payments.</span>
-        <a routerLink="/login" class="nudge-link">Go to Sign In</a>
+      <div class="auth-pill">
+        <span class="auth-text">Sign in to lock seats instantly</span>
+        <a routerLink="/login" class="auth-cta">
+          <span>Sign In</span>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
       </div>
     }
   </section>
 
   @if (errorMessage()) {
-    <div class="error-banner">
-      {{ errorMessage() }}
+    <div class="error-toast" role="alert">
+      <svg class="w-5 h-5 shrink-0 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      <span>{{ errorMessage() }}</span>
     </div>
   }
 
-  <!-- Movies List -->
-  <section class="movies-section">
-    <div class="section-header">
+  <!-- Movies Showcase Section -->
+  <section class="movies-container">
+    <div class="section-headline-group">
       <div>
-        <h2 class="section-heading">Now Showing</h2>
+        <div class="flex items-center gap-2">
+          <span class="section-indicator"></span>
+          <h2 class="section-heading">Now Showing</h2>
+        </div>
         @if (selectedCity()) {
           <p class="section-caption">
-            Showing movies in <span class="highlight-text">{{ selectedCity()!.name }}, {{ selectedCity()!.state }}</span>
+            In theatres across <span class="text-white font-medium">{{ selectedCity()!.name }}, {{ selectedCity()!.state }}</span>
           </p>
         }
       </div>
 
       @if (movies().length > 0) {
-        <span class="count-pill">{{ movies().length }} {{ movies().length === 1 ? 'movie' : 'movies' }}</span>
+        <span class="badge-count">{{ movies().length }} {{ movies().length === 1 ? 'Title' : 'Titles' }}</span>
       }
     </div>
 
     @if (!selectedState()) {
-      <div class="empty-state">
-        Select a <span class="highlight-text">state</span> above to choose a city and browse movies.
+      <div class="state-placeholder">
+        <div class="placeholder-icon">📍</div>
+        <p class="font-medium text-slate-200">Start by choosing your location</p>
+        <p class="text-xs text-slate-400 mt-1">Select a state and city above to reveal available shows.</p>
       </div>
     } @else if (!selectedCityId()) {
-      <div class="empty-state">
-        Now pick a <span class="highlight-text">city</span> in {{ selectedState() }} to view available movies.
+      <div class="state-placeholder">
+        <div class="placeholder-icon">🏙️</div>
+        <p class="font-medium text-slate-200">Select a city in {{ selectedState() }}</p>
+        <p class="text-xs text-slate-400 mt-1">We'll pull up what's playing in nearby cinemas.</p>
       </div>
     } @else if (loadingMovies()) {
-      <div class="empty-state">Loading movies...</div>
+      <div class="loading-grid">
+        @for (_ of [1,2,3,4]; track $index) {
+          <div class="skeleton-card"></div>
+        }
+      </div>
     } @else if (movies().length === 0) {
-      <div class="empty-state">No movies with upcoming shows in this city.</div>
+      <div class="state-placeholder">
+        <div class="placeholder-icon">🎬</div>
+        <p class="font-medium text-slate-200">No movies found</p>
+        <p class="text-xs text-slate-400 mt-1">There are no upcoming scheduled shows in this city right now.</p>
+      </div>
     } @else {
       <div class="movies-grid">
         @for (movie of movies(); track movie.id) {
           <button
             type="button"
             (click)="selectMovie(movie)"
-            class="movie-card"
+            class="group movie-card"
             [class.movie-card--selected]="selectedMovie()?.id === movie.id"
           >
-            <div class="movie-card__header">
+            <!-- Poster Backdrop / Placeholder Gradient -->
+            <div class="movie-poster">
+              <div class="poster-gradient-overlay"></div>
+
+              <!-- Floating Rating Badge -->
+              <div class="floating-badge">
+                <svg class="w-3.5 h-3.5 text-amber-400 inline" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span>{{ movie.rating }}</span>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="movie-content">
               <h3 class="movie-title">{{ movie.title }}</h3>
-              <span class="rating-badge">{{ movie.rating }}</span>
+              <p class="movie-meta-sub">{{ movie.duration_minutes }}m • Feature</p>
+
+              <div class="tag-row">
+                @for (fmt of movie.formats; track fmt) {
+                  <span class="tag-format">{{ fmt }}</span>
+                }
+                @for (lang of movie.languages; track lang) {
+                  <span class="tag-lang">{{ lang }}</span>
+                }
+              </div>
             </div>
 
-            <p class="movie-duration">{{ movie.duration_minutes }} mins</p>
-
-            <div class="meta-tags">
-              @for (lang of movie.languages; track lang) {
-                <span class="lang-tag">{{ lang }}</span>
-              }
-              @for (fmt of movie.formats; track fmt) {
-                <span class="format-tag">{{ fmt }}</span>
-              }
-            </div>
+            <!-- Active Indicator Pill -->
+            @if (selectedMovie()?.id === movie.id) {
+              <div class="selected-pill-indicator">
+                <span class="selected-dot"></span> Showing Times
+              </div>
+            }
           </button>
         }
       </div>
     }
   </section>
 
-  <!-- Showtimes for Selected Movie -->
+  <!-- Showtimes Panel -->
   @if (selectedMovie()) {
-    <section class="showtimes-panel">
+    <section class="showtimes-section">
       <div class="showtimes-header">
-        <div>
-          <h2 class="panel-heading">Showtimes — {{ selectedMovie()!.title }}</h2>
-          <p class="panel-subtitle">Select a showtime to open the real-time seat matrix</p>
+        <div class="showtimes-headline">
+          <span class="tag-format uppercase tracking-widest text-[10px]">Select Tickets</span>
+          <h2 class="showtimes-title">{{ selectedMovie()!.title }}</h2>
         </div>
 
-        <div class="date-group">
-          <label for="showDateInput" class="date-label">Date</label>
+        <div class="date-picker-wrap">
+          <label for="showDateInput" class="date-caption">Experience Date</label>
           <input
             id="showDateInput"
             type="date"
-            class="control-input"
+            class="date-input"
             [ngModel]="selectedDate()"
             (ngModelChange)="onDateChange($event)"
           />
@@ -130,24 +196,38 @@
       </div>
 
       @if (loadingShows()) {
-        <div class="empty-state">Loading showtimes...</div>
+        <div class="state-placeholder py-12">
+          <div class="animate-spin inline-block w-6 h-6 border-2 border-rose-500 border-t-transparent rounded-full mb-2"></div>
+          <p class="text-xs text-slate-400">Fetching live showtimes...</p>
+        </div>
       } @else if (shows().length === 0) {
-        <div class="empty-state">No shows scheduled for {{ selectedDate() }}.</div>
+        <div class="state-placeholder py-12">
+          <p class="text-slate-300 font-medium">No shows scheduled</p>
+          <p class="text-xs text-slate-500 mt-1">Try switching to another date above.</p>
+        </div>
       } @else {
         <div class="shows-grid">
           @for (show of shows(); track show.id) {
-            <div class="show-card">
-              <div class="space-y-2.5">
-                <div class="show-card__top">
-                  <span class="show-time">{{ show.start_time | date: 'shortTime' }}</span>
-                  <span class="show-format">{{ show.format }} • {{ show.language }}</span>
+            <div class="group show-tile">
+              <div class="show-tile-main">
+                <div class="flex items-center justify-between">
+                  <span class="show-time-text">{{ show.start_time | date: 'shortTime' }}</span>
+                  <span class="format-pill">{{ show.format }} • {{ show.language }}</span>
                 </div>
 
-                <p class="show-venue">Cinema: {{ show.cinema_id }} • Hall: {{ show.hall_id }}</p>
+                <div class="venue-info">
+                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
+                  </svg>
+                  <span>Hall {{ show.hall_id }} • Complex {{ show.cinema_id }}</span>
+                </div>
 
-                <div class="pricing-list">
+                <div class="pricing-wrap">
                   @for (tier of getTierEntries(show.pricing); track tier[0]) {
-                    <span class="tier-chip">{{ tier[0] }}: ₹{{ tier[1] }}</span>
+                    <div class="pricing-pill">
+                      <span class="text-slate-400 font-normal">{{ tier[0] }}</span>
+                      <span class="text-rose-400 font-semibold">₹{{ tier[1] }}</span>
+                    </div>
                   }
                 </div>
               </div>
@@ -155,9 +235,12 @@
               <button
                 type="button"
                 (click)="openSeatMap(show)"
-                class="select-seats-btn"
+                class="seat-cta-btn"
               >
-                Select Seats
+                <span>Select Seats</span>
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
               </button>
             </div>
           }
