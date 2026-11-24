@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { City, HallLayoutResponse, Movie, Show } from '../../models/bms.models';
 import { MovieRecord } from '../../models/movie.models';
+import { ShowSearchResponseItem } from '../../models/show.models';
 
 export interface CreateShowPayload {
   id?: string;
@@ -32,12 +33,12 @@ export class CatalogService {
     return this.http.get<MovieRecord[]>(`${environment.apiBaseUrl}/api/v1/movies?city=${cityId}&active_only=true`);
   }
 
-  getShows(movieId: string, date: string, cityId: string): Observable<Show[]> {
+  getAllShowsForMovieInACityForADate(movieId : string, date: string, cityId: string) {
     const params = new HttpParams()
-      .set('movie_id', movieId)
-      .set('date', date)
-      .set('city', cityId);
-    return this.http.get<Show[]>(`${this.baseUrl}/shows`, { params });
+      .set("movie_id", movieId)
+      .set("date", date)
+      .set("city", cityId);
+    return this.http.get<ShowSearchResponseItem[]>(`${this.baseUrl}/shows`, { params});
   }
 
   getHallLayout(hallId: string): Observable<HallLayoutResponse> {

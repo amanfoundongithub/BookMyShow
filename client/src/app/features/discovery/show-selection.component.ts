@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { City, Movie, Show } from '../../models/bms.models';
 import { CityService } from '../../core/services/city.service';
+import { ShowSearchResponseItem } from '../../models/show.models';
 
 @Component({
   selector: 'app-show-selection',
@@ -28,7 +29,7 @@ export class ShowSelectionComponent implements OnInit {
   readonly movies = signal<Movie[]>([]);
   readonly selectedMovie = signal<Movie | null>(null);
   readonly selectedDate = signal<string>(new Date().toISOString().slice(0, 10));
-  readonly shows = signal<Show[]>([]);
+  readonly shows = signal<ShowSearchResponseItem[]>([]);
 
   readonly loadingMovies = signal<boolean>(false);
   readonly loadingShows = signal<boolean>(false);
@@ -94,7 +95,7 @@ export class ShowSelectionComponent implements OnInit {
     return Object.entries(pricing || {});
   }
 
-  openSeatMap(show: Show): void {
+  openSeatMap(show: ShowSearchResponseItem): void {
     this.router.navigate(['/shows', show.id, 'seats'], {
       queryParams: {
         hallId: show.hall_id,
@@ -124,7 +125,7 @@ export class ShowSelectionComponent implements OnInit {
     this.loadingShows.set(true);
     this.errorMessage.set(null);
     this.catalogService
-      .getShows(movie.id, this.selectedDate(), this.selectedCityId())
+      .getAllShowsForMovieInACityForADate(movie.id, this.selectedDate(), this.selectedCityId())
       .subscribe({
         next: (shows) => {
           this.shows.set(shows);
