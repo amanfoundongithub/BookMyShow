@@ -85,7 +85,7 @@
       "name": "Catalog",
       "item": [
         {
-          "name": "Cities",
+          "name": "Catalog - List Cities",
           "request": { "method": "GET", "url": "{{gatewayUrl}}/api/v1/catalog/cities" }
         },
         {
@@ -112,6 +112,46 @@
             "const body = pm.response.json();",
             "if (body.id) pm.collectionVariables.set('showId', body.id);"
           ], "type": "text/javascript" }}]
+        }
+      ]
+    },
+    {
+      "name": "Cities Service",
+      "description": "City CRUD endpoints through the API gateway. Create, update, and delete require an ADMIN bearer token.",
+      "item": [
+        {
+          "name": "List Cities",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{gatewayUrl}}/api/v1/cities" }
+        },
+        {
+          "name": "Get City",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{gatewayUrl}}/api/v1/cities/{{cityId}}" }
+        },
+        {
+          "name": "Create City",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"city-example\",\n  \"name\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"country\": \"India\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/cities"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const body = pm.response.json();",
+            "if (body.id) pm.collectionVariables.set('cityId', body.id);"
+          ], "type": "text/javascript" }}]
+        },
+        {
+          "name": "Update City",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"country\": \"India\"\n}" },
+            "url": "{{gatewayUrl}}/api/v1/cities/{{cityId}}"
+          }
+        },
+        {
+          "name": "Delete City",
+          "request": { "method": "DELETE", "url": "{{gatewayUrl}}/api/v1/cities/{{cityId}}" }
         }
       ]
     },
