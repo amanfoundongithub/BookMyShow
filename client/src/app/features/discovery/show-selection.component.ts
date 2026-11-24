@@ -98,8 +98,7 @@ export class ShowSelectionComponent implements OnInit {
   openSeatMap(show: ShowSearchResponseItem): void {
     this.router.navigate(['/shows', show.id, 'seats'], {
       queryParams: {
-        hallId: show.hall_id,
-        pricing: JSON.stringify(show.pricing ?? {}),
+        hallId: show.hall_id
       },
     });
   }
