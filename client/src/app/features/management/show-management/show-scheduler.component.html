@@ -1,0 +1,218 @@
+<div class="scheduler-container">
+  <!-- Header -->
+  <header class="scheduler-header">
+    <div class="header-text-group">
+      <div class="header-badge">
+        <span class="badge-dot"></span>
+        Catalog & Showtimes
+      </div>
+      <h1 class="scheduler-title">Show Scheduler</h1>
+      <p class="scheduler-subtitle">
+        Publish shows to Catalog Service scoped to your assigned cinema and hall.
+      </p>
+    </div>
+  </header>
+
+  <!-- Error & Success Banners -->
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert">
+      <span class="alert-dot alert-dot-error" aria-hidden="true"></span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (statusMessage()) {
+    <div class="alert alert-success" role="status">
+      <span class="alert-dot alert-dot-success" aria-hidden="true"></span>
+      <span>{{ statusMessage() }}</span>
+    </div>
+  }
+
+  <!-- Scheduler Form Card -->
+  <section class="scheduler-card">
+    <div class="card-section">
+      <div class="section-heading">
+        <h2 class="section-title">Showtime & Venue Details</h2>
+        <p class="section-desc">Assign the property, auditorium, movie title, screening time, and format.</p>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="field-label" for="cinemaSelect">Cinema</label>
+          <div class="input-wrap">
+            <select
+              id="cinemaSelect"
+              class="field-input field-select"
+              [ngModel]="selectedCinemaId()"
+              (ngModelChange)="onSelectCinema($event)"
+            >
+              @for (cinema of allowedCinemas(); track cinema.cinema_id) {
+                <option [value]="cinema.cinema_id">{{ cinema.name }}</option>
+              }
+            </select>
+            <span class="select-chevron" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="hallSelect">Hall</label>
+          <div class="input-wrap">
+            <select
+              id="hallSelect"
+              class="field-input field-select"
+              [ngModel]="selectedHallId()"
+              (ngModelChange)="selectedHallId.set($event)"
+            >
+              @for (hall of halls(); track hall.hall_id) {
+                <option [value]="hall.hall_id">{{ hall.name }} ({{ hall.screen_format }})</option>
+              }
+            </select>
+            <span class="select-chevron" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="movieSelect">Movie</label>
+          <div class="input-wrap">
+            @if (movies().length > 0) {
+              <select
+                id="movieSelect"
+                class="field-input field-select"
+                [ngModel]="selectedMovieId()"
+                (ngModelChange)="onSelectMovie($event)"
+              >
+                @for (movie of movies(); track movie.id) {
+                  <option [value]="movie.id">{{ movie.title }} ({{ movie.duration_minutes }}m)</option>
+                }
+              </select>
+              <span class="select-chevron" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            } @else {
+              <input
+                id="movieSelect"
+                type="text"
+                class="field-input"
+                [ngModel]="selectedMovieId()"
+                (ngModelChange)="selectedMovieId.set($event)"
+                placeholder="e.g. mov_inception"
+              />
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="startTime">Start Time</label>
+          <input
+            id="startTime"
+            type="datetime-local"
+            class="field-input"
+            [ngModel]="startTimeLocal()"
+            (ngModelChange)="startTimeLocal.set($event)"
+          />
+        </div>
+
+        <div>
+          <label class="field-label" for="languageInput">Language</label>
+          <input
+            id="languageInput"
+            type="text"
+            class="field-input"
+            [ngModel]="language()"
+            (ngModelChange)="language.set($event)"
+            placeholder="e.g. English, Hindi, Telugu"
+          />
+        </div>
+
+        <div>
+          <label class="field-label" for="formatInput">Format</label>
+          <input
+            id="formatInput"
+            type="text"
+            class="field-input"
+            [ngModel]="format()"
+            (ngModelChange)="format.set($event)"
+            placeholder="e.g. IMAX 2D, Dolby Atmos"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier Pricing Section -->
+    <div class="pricing-section">
+      <div class="pricing-header">
+        <h2 class="pricing-heading">Tier Pricing (INR)</h2>
+        <span class="pricing-currency-badge">INR · ₹</span>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="tier-box">
+          <label class="pricing-label" for="reclinerPrice">Recliner</label>
+          <div class="price-input-wrap">
+            <span class="currency-prefix" aria-hidden="true">₹</span>
+            <input
+              id="reclinerPrice"
+              type="number"
+              min="1"
+              class="field-input price-input"
+              [ngModel]="reclinerPrice()"
+              (ngModelChange)="reclinerPrice.set(+$event)"
+            />
+          </div>
+        </div>
+
+        <div class="tier-box">
+          <label class="pricing-label" for="primePrice">Prime</label>
+          <div class="price-input-wrap">
+            <span class="currency-prefix" aria-hidden="true">₹</span>
+            <input
+              id="primePrice"
+              type="number"
+              min="1"
+              class="field-input price-input"
+              [ngModel]="primePrice()"
+              (ngModelChange)="primePrice.set(+$event)"
+            />
+          </div>
+        </div>
+
+        <div class="tier-box">
+          <label class="pricing-label" for="classicPrice">Classic</label>
+          <div class="price-input-wrap">
+            <span class="currency-prefix" aria-hidden="true">₹</span>
+            <input
+              id="classicPrice"
+              type="number"
+              min="1"
+              class="field-input price-input"
+              [ngModel]="classicPrice()"
+              (ngModelChange)="classicPrice.set(+$event)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="scheduler-footer">
+      <button
+        type="button"
+        [disabled]="submitting()"
+        (click)="createShow()"
+        class="submit-btn"
+      >
+        {{ submitting() ? 'Scheduling...' : 'Publish Show' }}
+      </button>
+    </div>
+  </section>
+</div>
