@@ -58,7 +58,7 @@ export const routes: Routes = [
       {
         path: 'shows',
         loadComponent: () =>
-          import('./features/management/show-scheduler.component').then(
+          import('./features/management/show-management/show-scheduler.component').then(
             (m) => m.ShowSchedulerComponent
           ),
       },

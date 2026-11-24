@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { CatalogService } from '../../core/services/catalog.service';
-import { HallService } from '../../core/services/hall.service';
-import { CinemaSummary, HallLayoutResponse, Movie, Show } from '../../models/bms.models';
+import { AuthService } from '../../../core/services/auth.service';
+import { CatalogService } from '../../../core/services/catalog.service';
+import { HallService } from '../../../core/services/hall.service';
+import { CinemaSummary, HallLayoutResponse, Movie, Show } from '../../../models/bms.models';
 
 @Component({
   selector: 'app-show-scheduler',
