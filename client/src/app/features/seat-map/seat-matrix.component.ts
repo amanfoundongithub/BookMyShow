@@ -13,7 +13,7 @@ import {
   SeatLockStatus,
   SeatStatusUpdateEvent,
 } from '../../models/bms.models';
-import { HoldCountdownComponent } from './hold-countdown.component';
+import { HoldCountdownComponent } from './hold-countdown/hold-countdown.component';
 import { HallService } from '../../core/services/hall.service';
 
 type VisualSeatState = 'AVAILABLE' | 'SELECTED' | 'HELD' | 'CONFIRMED';
