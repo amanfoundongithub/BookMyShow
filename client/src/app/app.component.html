@@ -15,6 +15,20 @@
           <a routerLink="/bookings" routerLinkActive="nav-link--active" class="nav-link">
             My Bookings
           </a>
+          @if (authService.isAdmin()) {
+          <a routerLink="/management/cities" routerLinkActive="nav-link--active" class="nav-link">
+            City Management
+          </a>
+          <a routerLink="/management/cinemas/new" routerLinkActive="nav-link--active" class="nav-link">
+            Cinema Management
+          </a>
+          <a routerLink="/management/halls" routerLinkActive="nav-link--active" class="nav-link">
+            Hall Management
+          </a>
+          <a routerLink="/management/shows" routerLinkActive="nav-link--active" class="nav-link">
+            Show Management
+          </a>
+          }
         </nav>
       </div>
 

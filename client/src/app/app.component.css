@@ -10,11 +10,11 @@
 }
 
 .header-inner {
-  @apply max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4;
+  @apply max-w-6xl mx-auto px-4 sm:px-6 min-h-16 flex flex-wrap items-center justify-between gap-4 py-2;
 }
 
 .header-left {
-  @apply flex items-center gap-6;
+  @apply flex flex-wrap items-center gap-x-6 gap-y-2;
 }
 
 .brand-link {
@@ -34,7 +34,7 @@
 }
 
 .primary-nav {
-  @apply flex items-center gap-1.5;
+  @apply flex flex-wrap items-center gap-1;
 }
 
 .nav-link {
