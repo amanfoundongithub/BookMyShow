@@ -31,6 +31,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'cities',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+        loadComponent: () =>
+          import('./features/management/city-management.component').then(
+            (m) => m.CityManagementComponent
+          ),
+      },
+      {
         path: 'halls',
         loadComponent: () =>
           import('./features/management/hall-layout-builder.component').then(

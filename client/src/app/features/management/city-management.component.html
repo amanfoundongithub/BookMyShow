@@ -1,0 +1,161 @@
+<div class="city-container">
+  <div class="city-header">
+    <div>
+      <h1 class="city-title">City Management</h1>
+      <p class="city-subtitle">Add, update, and remove cities in the BookMyShow catalog</p>
+    </div>
+    <div class="city-count">
+      {{ cities().length }} {{ cities().length === 1 ? 'city' : 'cities' }}
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      {{ errorMessage() }}
+      @if (!loading()) {
+        <button type="button" class="retry-btn" (click)="loadCities()">Retry</button>
+      }
+    </div>
+  }
+  @if (statusMessage()) {
+    <div class="alert-success" role="status">{{ statusMessage() }}</div>
+  }
+
+  <form class="city-form-card" (ngSubmit)="submitCity()">
+    <div>
+      <h2 class="section-title">{{ editingCityId() ? 'Edit City' : 'Add a City' }}</h2>
+      <p class="section-subtitle">
+        {{ editingCityId() ? 'Update the city details below.' : 'Enter the location details to add it to the catalog.' }}
+      </p>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label class="field-label" for="city-id">City ID *</label>
+        <input
+          id="city-id"
+          name="cityId"
+          class="field-input"
+          [ngModel]="cityId()"
+          (ngModelChange)="cityId.set($event)"
+          placeholder="e.g. city_hyd"
+          minlength="2"
+          maxlength="80"
+          [readonly]="!!editingCityId()"
+          required
+        />
+      </div>
+      <div>
+        <label class="field-label" for="city-name">City Name *</label>
+        <input
+          id="city-name"
+          name="cityName"
+          class="field-input"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          placeholder="e.g. Hyderabad"
+          minlength="2"
+          maxlength="120"
+          required
+        />
+      </div>
+      <div>
+        <label class="field-label" for="city-state">State *</label>
+        <input
+          id="city-state"
+          name="cityState"
+          class="field-input"
+          [ngModel]="state()"
+          (ngModelChange)="state.set($event)"
+          placeholder="e.g. Telangana"
+          minlength="2"
+          maxlength="120"
+          required
+        />
+      </div>
+      <div>
+        <label class="field-label" for="city-country">Country *</label>
+        <input
+          id="city-country"
+          name="cityCountry"
+          class="field-input"
+          [ngModel]="country()"
+          (ngModelChange)="country.set($event)"
+          placeholder="e.g. India"
+          minlength="2"
+          maxlength="120"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="form-footer">
+      @if (editingCityId()) {
+        <button type="button" class="cancel-btn" (click)="resetForm()">Cancel</button>
+      }
+      <button type="submit" class="submit-btn" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : (editingCityId() ? 'Save Changes' : 'Add City') }}
+      </button>
+    </div>
+  </form>
+
+  <section class="cities-card" aria-labelledby="cities-heading">
+    <div class="list-header">
+      <div>
+        <h2 id="cities-heading" class="section-title">Cities</h2>
+        <p class="section-subtitle">Manage the locations available to customers</p>
+      </div>
+      <input
+        type="search"
+        class="search-input"
+        aria-label="Search cities"
+        placeholder="Search cities..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </div>
+
+    @if (loading()) {
+      <div class="empty-state">Loading cities...</div>
+    } @else if (filteredCities().length === 0) {
+      <div class="empty-state">
+        {{ searchTerm() ? 'No cities match your search.' : 'No cities have been added yet.' }}
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="city-table">
+          <thead>
+            <tr>
+              <th scope="col">City</th>
+              <th scope="col">State</th>
+              <th scope="col">Country</th>
+              <th scope="col">City ID</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (city of filteredCities(); track city.id) {
+              <tr>
+                <td class="city-name-cell">{{ city.name }}</td>
+                <td>{{ city.state }}</td>
+                <td>{{ city.country }}</td>
+                <td><code class="city-id">{{ city.id }}</code></td>
+                <td class="actions-cell">
+                  @if (deletingCityId() === city.id) {
+                    <span class="delete-prompt">Delete?</span>
+                    <button type="button" class="confirm-delete-btn" (click)="confirmDelete(city)">Confirm</button>
+                    <button type="button" class="cancel-btn" (click)="deletingCityId.set(null)">Cancel</button>
+                  } @else {
+                    <button type="button" class="edit-btn" (click)="editCity(city)">Edit</button>
+                    <button type="button" class="delete-btn" (click)="deleteCity(city)">Delete</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

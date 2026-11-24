@@ -6,9 +6,16 @@
         Register a new cinema property before configuring halls and layouts
       </p>
     </div>
-    <a routerLink="/management/halls" class="hall-builder-link">
-      Go to Hall Builder →
-    </a>
+    <div class="header-links">
+      @if (auth.isAdmin()) {
+        <a routerLink="/management/cities" class="hall-builder-link">
+          Manage Cities
+        </a>
+      }
+      <a routerLink="/management/halls" class="hall-builder-link">
+        Go to Hall Builder →
+      </a>
+    </div>
   </div>
 
   @if (errorMessage()) {

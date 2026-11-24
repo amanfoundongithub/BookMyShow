@@ -1,0 +1,139 @@
+@reference "tailwindcss";
+
+:host {
+  display: block;
+}
+
+.city-container {
+  @apply max-w-6xl mx-auto p-6 space-y-6;
+}
+
+.city-header,
+.list-header {
+  @apply flex flex-wrap items-center justify-between gap-4;
+}
+
+.city-title {
+  @apply text-2xl font-bold text-slate-900;
+}
+
+.city-subtitle,
+.section-subtitle {
+  @apply text-sm text-slate-500;
+}
+
+.city-count {
+  @apply rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700;
+}
+
+.alert-error {
+  @apply flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700;
+}
+
+.alert-success {
+  @apply rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700;
+}
+
+.retry-btn {
+  @apply font-semibold underline underline-offset-2;
+}
+
+.city-form-card,
+.cities-card {
+  @apply space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+}
+
+.section-title {
+  @apply text-base font-semibold text-slate-900;
+}
+
+.form-grid {
+  @apply grid grid-cols-1 gap-4 md:grid-cols-2;
+}
+
+.field-label {
+  @apply mb-1 block text-xs font-semibold uppercase text-slate-500;
+}
+
+.field-input,
+.search-input {
+  @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none;
+}
+
+.field-input:read-only {
+  @apply bg-slate-50 text-slate-500;
+}
+
+.form-footer {
+  @apply flex justify-end gap-2 pt-1;
+}
+
+.submit-btn {
+  @apply rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.cancel-btn,
+.edit-btn,
+.delete-btn,
+.confirm-delete-btn {
+  @apply rounded-lg border px-3 py-1.5 text-xs font-semibold transition;
+}
+
+.cancel-btn,
+.edit-btn {
+  @apply border-slate-300 text-slate-700 hover:bg-slate-50;
+}
+
+.delete-btn,
+.confirm-delete-btn {
+  @apply border-red-200 text-red-700 hover:bg-red-50;
+}
+
+.list-header {
+  @apply items-start;
+}
+
+.search-input {
+  @apply max-w-xs;
+}
+
+.empty-state {
+  @apply rounded-lg bg-slate-50 px-4 py-10 text-center text-sm text-slate-500;
+}
+
+.table-wrap {
+  @apply overflow-x-auto;
+}
+
+.city-table {
+  @apply w-full border-collapse text-left text-sm;
+}
+
+.city-table th {
+  @apply border-b border-slate-200 px-3 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500;
+}
+
+.city-table td {
+  @apply border-b border-slate-100 px-3 py-3 text-slate-600;
+}
+
+.city-name-cell {
+  @apply font-semibold text-slate-900;
+}
+
+.city-id {
+  @apply rounded bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600;
+}
+
+.actions-cell {
+  @apply whitespace-nowrap text-right;
+}
+
+.actions-cell > button + button {
+  @apply ml-2;
+}
+
+.delete-prompt {
+  @apply mr-2 text-xs font-medium text-red-700;
+}
+
