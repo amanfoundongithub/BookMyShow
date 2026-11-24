@@ -5,7 +5,9 @@ import { environment } from '../../../environments/environment';
 import { 
   CityCreateRequest, 
   CityCreateResponse, 
-  CityListItem 
+  CityListItem, 
+  CityUpdateRequest,
+  CityUpdateResponse
 } from '../../models/city.models';
 
 @Injectable({ 
@@ -24,6 +26,12 @@ export class CityService {
     return this.http.post<CityCreateResponse>(`${this.baseUrl}/api/v1/cities`, payload);
   }
 
-  
+  updateCity(payload : CityUpdateRequest, cityId : string) : Observable<CityUpdateResponse> {
+    return this.http.patch<CityUpdateResponse>(`${this.baseUrl}/api/v1/cities/${cityId}`, payload);
+  }
+
+  deleteCity(cityId : string) : Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/api/v1/cities/${cityId}`);
+  } 
 
 }
