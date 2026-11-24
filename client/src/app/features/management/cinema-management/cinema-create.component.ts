@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { City, CinemaSummary } from '../../models/bms.models';
-import { CatalogService } from '../../core/services/catalog.service';
-import { HallService } from '../../core/services/hall.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { City, CinemaSummary } from '../../../models/bms.models';
+import { CatalogService } from '../../../core/services/catalog.service';
+import { HallService } from '../../../core/services/hall.service';
 
 @Component({
   selector: 'app-cinema-create',

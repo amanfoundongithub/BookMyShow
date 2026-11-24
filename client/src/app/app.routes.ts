@@ -26,7 +26,7 @@ export const routes: Routes = [
       {
         path: 'cinemas/new',
         loadComponent: () =>
-          import('./features/management/cinema-create.component').then(
+          import('./features/management/cinema-management/cinema-create.component').then(
             (m) => m.CinemaCreateComponent
           ),
       },
