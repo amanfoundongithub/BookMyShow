@@ -5,3 +5,21 @@ export interface CityListItem {
     state : string,
     country : string
 };
+
+// City create request & response
+
+export interface CityCreateRequest {
+    id : string,
+    name : string,
+    state : string,
+    country : string
+};
+
+export interface CityCreateResponse {
+    id : string,
+    name : string,
+    state : string,
+    country : string
+}
+
+// City update request & response
