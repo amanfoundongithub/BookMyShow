@@ -1,0 +1,231 @@
+<div class="cinema-create-container">
+  <!-- Top Bar / Breadcrumb & Header -->
+  <header class="cinema-header">
+    <div class="header-text-group">
+      <div class="header-badge">
+        <span class="badge-dot"></span>
+        Inventory & Assets
+      </div>
+      <h1 class="cinema-title">Register Cinema</h1>
+      <p class="cinema-subtitle">
+        Set up the theater property profile before defining auditoriums, seating tiers, and projection layouts.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      @if (auth.isAdmin()) {
+        <a routerLink="/management/cities" class="action-btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433 1.244-.77 2.87-2.025 4.314-3.81 1.44-1.78 2.314-3.793 2.314-5.542A8 8 0 002 9c0 1.75.874 3.762 2.314 5.542 1.444 1.785 3.07 3.04 4.314 3.81.311.193.571.337.757.433.092.047.17.086.23.118l.051.022.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+          </svg>
+          Manage Cities
+        </a>
+      }
+      <a routerLink="/management/halls" class="action-btn-primary">
+        <span>Go to Hall Builder</span>
+        <svg class="btn-icon-right" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Error Notification -->
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert">
+      <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+      </svg>
+      <div class="alert-content">
+        <p class="alert-title">Submission Failed</p>
+        <p class="alert-message">{{ errorMessage() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Success Notification -->
+  @if (createdCinema(); as cinema) {
+    <div class="alert alert-success" role="status">
+      <div class="alert-body">
+        <div class="success-icon-wrap">
+          <svg class="alert-icon text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <p class="alert-title text-emerald-900">Property created successfully</p>
+          <p class="alert-message text-emerald-800">
+            Registered <strong>{{ cinema.name }}</strong> with Cinema ID:
+            <code class="cinema-id-code">{{ cinema.cinema_id }}</code>
+          </p>
+        </div>
+      </div>
+      <a routerLink="/management/halls" class="action-btn-success">
+        Configure Screens
+        <svg class="btn-icon-right" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L9.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.04-1.08l3.158-2.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  }
+
+  <!-- Cinema Creation Form -->
+  <form (ngSubmit)="submitCinema()" class="cinema-card">
+    <div class="card-section">
+      <div class="section-heading">
+        <h2 class="section-title">Property Details</h2>
+        <p class="section-desc">Specify basic identity, location mapping, and supported audio/visual formats.</p>
+      </div>
+
+      <div class="form-grid">
+        <!-- Cinema Name -->
+        <div class="col-span-full">
+          <label class="field-label" for="cinemaName">
+            Cinema Name <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrap">
+            <input
+              id="cinemaName"
+              type="text"
+              name="cinemaName"
+              class="field-input"
+              [ngModel]="name()"
+              (ngModelChange)="name.set($event)"
+              placeholder="e.g. AMB Cinemas, Gachibowli"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- City Select/Input -->
+        <div>
+          <label class="field-label" for="cityId">
+            Operating City <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrap">
+            @if (cities().length > 0) {
+              <select
+                id="cityId"
+                name="cityId"
+                class="field-input field-select"
+                [ngModel]="cityId()"
+                (ngModelChange)="onCitySelect($event)"
+              >
+                @for (city of cities(); track city.id) {
+                  <option [value]="city.id">{{ city.name }}, {{ city.state }}</option>
+                }
+              </select>
+              <div class="select-chevron">
+                <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            } @else {
+              <input
+                id="cityId"
+                type="text"
+                name="cityId"
+                class="field-input"
+                [ngModel]="cityId()"
+                (ngModelChange)="onCitySelect($event)"
+                placeholder="e.g. hyd"
+                required
+              />
+            }
+          </div>
+        </div>
+
+        <!-- State Name -->
+        <div>
+          <label class="field-label" for="stateName">
+            State / Region
+          </label>
+          <div class="input-wrap">
+            <input
+              id="stateName"
+              type="text"
+              name="stateName"
+              class="field-input"
+              [ngModel]="stateName()"
+              (ngModelChange)="stateName.set($event)"
+              placeholder="e.g. Telangana"
+            />
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="col-span-full">
+          <label class="field-label" for="amenities">
+            Amenities & Features
+            <span class="field-hint">Comma separated</span>
+          </label>
+          <div class="input-wrap">
+            <input
+              id="amenities"
+              type="text"
+              name="amenities"
+              class="field-input"
+              [ngModel]="amenitiesInput()"
+              (ngModelChange)="amenitiesInput.set($event)"
+              placeholder="IMAX with Laser, Dolby Atmos, 4DX, Recliner, Valet Parking"
+            />
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="col-span-full">
+          <label class="field-label" for="address">
+            Physical Address <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrap">
+            <textarea
+              id="address"
+              name="address"
+              rows="3"
+              class="field-input textarea-input"
+              [ngModel]="address()"
+              (ngModelChange)="address.set($event)"
+              placeholder="Unit #, Mall/Building Name, Road/Street, Landmark, Postal Code"
+              required
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Action Footer -->
+    <div class="card-footer">
+      <label class="toggle-control" for="isActive">
+        <input
+          id="isActive"
+          type="checkbox"
+          name="isActive"
+          class="sr-only peer"
+          [ngModel]="isActive()"
+          (ngModelChange)="isActive.set($event)"
+        />
+        <div class="toggle-switch"></div>
+        <div class="toggle-labels">
+          <span class="toggle-title">Active Property</span>
+          <span class="toggle-description">Enable booking and public schedules for this venue</span>
+        </div>
+      </label>
+
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="submit-btn"
+      >
+        @if (submitting()) {
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Registering...
+        } @else {
+          Register Cinema
+        }
+      </button>
+    </div>
+  </form>
+</div>
