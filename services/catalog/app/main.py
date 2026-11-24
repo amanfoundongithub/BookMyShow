@@ -7,7 +7,7 @@ from bms_common.logging import configure_logging, correlation_id_var
 from app.core.cache import close_redis, connect_redis
 from app.core.config import get_settings
 from app.core.db import close_mongo, connect_mongo
-from app.routers import health, movies, shows
+from app.routers import health, shows
 
 settings = get_settings()
 configure_logging(service_name=settings.service_name, level=settings.log_level)
@@ -42,5 +42,4 @@ async def correlation_middleware(request: Request, call_next):
 
 
 app.include_router(health.router)
-app.include_router(movies.router)
 app.include_router(shows.router)

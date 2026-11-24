@@ -14,6 +14,7 @@ import {
   SeatStatusUpdateEvent,
 } from '../../models/bms.models';
 import { HoldCountdownComponent } from './hold-countdown.component';
+import { HallService } from '../../core/services/hall.service';
 
 type VisualSeatState = 'AVAILABLE' | 'SELECTED' | 'HELD' | 'CONFIRMED';
 
@@ -29,6 +30,7 @@ export class SeatMatrixComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly catalogService = inject(CatalogService);
   private readonly bookingService = inject(BookingService);
+  private readonly hallService = inject(HallService);
   private readonly authService = inject(AuthService);
   readonly wsService = inject(WsSeatService);
 
@@ -222,7 +224,7 @@ export class SeatMatrixComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
 
     forkJoin({
-      layout: this.catalogService.getHallLayout(this.hallId()),
+      layout: this.hallService.getHallLayout(this.hallId()),
       seatMap: this.bookingService.getSeatMap(this.showId(), this.hallId()),
     }).subscribe({
       next: ({ layout, seatMap }) => {
