@@ -111,7 +111,7 @@
         aria-label="Search cities"
         placeholder="Search cities..."
         [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
+        (ngModelChange)="setSearchTerm($event)"
         [ngModelOptions]="{ standalone: true }"
       />
     </div>
@@ -133,9 +133,56 @@
               <th scope="col">City ID</th>
               <th scope="col"><span class="sr-only">Actions</span></th>
             </tr>
+            <tr class="filter-row">
+              <th scope="col">
+                <input
+                  type="search"
+                  class="column-search-input"
+                  aria-label="Filter by city name"
+                  placeholder="Filter city"
+                  [ngModel]="columnFilters().name"
+                  (ngModelChange)="setColumnFilter('name', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </th>
+              <th scope="col">
+                <input
+                  type="search"
+                  class="column-search-input"
+                  aria-label="Filter by state"
+                  placeholder="Filter state"
+                  [ngModel]="columnFilters().state"
+                  (ngModelChange)="setColumnFilter('state', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </th>
+              <th scope="col">
+                <input
+                  type="search"
+                  class="column-search-input"
+                  aria-label="Filter by country"
+                  placeholder="Filter country"
+                  [ngModel]="columnFilters().country"
+                  (ngModelChange)="setColumnFilter('country', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </th>
+              <th scope="col">
+                <input
+                  type="search"
+                  class="column-search-input"
+                  aria-label="Filter by city ID"
+                  placeholder="Filter ID"
+                  [ngModel]="columnFilters().id"
+                  (ngModelChange)="setColumnFilter('id', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </th>
+              <th scope="col"></th>
+            </tr>
           </thead>
           <tbody>
-            @for (city of filteredCities(); track city.id) {
+            @for (city of paginatedCities(); track city.id) {
               <tr>
                 <td class="city-name-cell">{{ city.name }}</td>
                 <td>{{ city.state }}</td>
@@ -155,6 +202,45 @@
             }
           </tbody>
         </table>
+      </div>
+      <div class="pagination-controls">
+        <div class="pagination-summary" aria-live="polite">
+          Showing {{ firstVisibleRow() }}–{{ lastVisibleRow() }} of {{ filteredCities().length }} cities
+        </div>
+        <div class="pagination-actions">
+          <label class="page-size-control">
+            Rows per page
+            <select
+              class="page-size-select"
+              [ngModel]="pageSize()"
+              (ngModelChange)="setPageSize(+$event)"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="25">25</option>
+              <option [ngValue]="50">50</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            class="page-btn"
+            aria-label="Previous page"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()"
+          >
+            Previous
+          </button>
+          <span class="page-indicator">Page {{ currentPage() }} of {{ pageCount() }}</span>
+          <button
+            type="button"
+            class="page-btn"
+            aria-label="Next page"
+            [disabled]="currentPage() >= pageCount()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
       </div>
     }
   </section>

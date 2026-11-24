@@ -8,6 +8,8 @@ import {
   CityUpdateRequest,
 } from '../../../models/city.models';
 
+type CityColumn = 'name' | 'state' | 'country' | 'id';
+
 @Component({
   selector: 'app-city-management',
   standalone: true,
@@ -21,6 +23,14 @@ export class CityManagementComponent implements OnInit {
 
   readonly cities = signal<CityListItem[]>([]);
   readonly searchTerm = signal('');
+  readonly columnFilters = signal<Record<CityColumn, string>>({
+    name: '',
+    state: '',
+    country: '',
+    id: '',
+  });
+  readonly pageNumber = signal(1);
+  readonly pageSize = signal(10);
   readonly cityId = signal('');
   readonly name = signal('');
   readonly state = signal('');
@@ -34,14 +44,34 @@ export class CityManagementComponent implements OnInit {
 
   readonly filteredCities = computed(() => {
     const query = this.searchTerm().trim().toLowerCase();
-    if (!query) {
-      return this.cities();
-    }
-    return this.cities().filter((city) =>
-      [city.name, city.state, city.country, city.id]
-        .some((value) => value.toLowerCase().includes(query))
-    );
+    const filters = this.columnFilters();
+    return this.cities().filter((city) => {
+      const matchesGlobalSearch =
+        !query ||
+        [city.name, city.state, city.country, city.id]
+          .some((value) => value.toLowerCase().includes(query));
+      const matchesColumns = (Object.keys(filters) as CityColumn[])
+        .every((column) =>
+          city[column].toLowerCase().includes(filters[column].trim().toLowerCase())
+        );
+      return matchesGlobalSearch && matchesColumns;
+    });
   });
+
+  readonly pageCount = computed(() =>
+    Math.max(1, Math.ceil(this.filteredCities().length / this.pageSize()))
+  );
+  readonly currentPage = computed(() => Math.min(this.pageNumber(), this.pageCount()));
+  readonly paginatedCities = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredCities().slice(start, start + this.pageSize());
+  });
+  readonly firstVisibleRow = computed(() =>
+    this.filteredCities().length ? (this.currentPage() - 1) * this.pageSize() + 1 : 0
+  );
+  readonly lastVisibleRow = computed(() =>
+    Math.min(this.currentPage() * this.pageSize(), this.filteredCities().length)
+  );
 
   ngOnInit(): void {
     this.loadCities();
@@ -61,6 +91,29 @@ export class CityManagementComponent implements OnInit {
         this.errorMessage.set(err?.error?.detail ?? 'Failed to load cities.');
       },
     });
+  }
+
+  setSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+    this.pageNumber.set(1);
+  }
+
+  setColumnFilter(column: CityColumn, value: string): void {
+    this.columnFilters.update((filters) => ({ ...filters, [column]: value }));
+    this.pageNumber.set(1);
+  }
+
+  setPageSize(value: number): void {
+    this.pageSize.set(value);
+    this.pageNumber.set(1);
+  }
+
+  previousPage(): void {
+    this.pageNumber.update((page) => Math.max(1, page - 1));
+  }
+
+  nextPage(): void {
+    this.pageNumber.update((page) => Math.min(this.pageCount(), page + 1));
   }
 
   submitCity(): void {
