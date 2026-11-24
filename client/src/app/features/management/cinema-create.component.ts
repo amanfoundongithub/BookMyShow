@@ -12,7 +12,7 @@ import { HallService } from '../../core/services/hall.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './cinema-create.component.html',
-  styleUrl : './cinema-create.component.css'
+  styleUrl: './cinema-create.component.css'
 })
 export class CinemaCreateComponent implements OnInit {
   private readonly hallApi = inject(HallService);

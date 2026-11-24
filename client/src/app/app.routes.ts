@@ -35,7 +35,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
         loadComponent: () =>
-          import('./features/management/city-management.component').then(
+          import('./features/management/city-management/city-management.component').then(
             (m) => m.CityManagementComponent
           ),
       },

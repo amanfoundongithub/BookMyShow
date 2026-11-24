@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CityService } from '../../core/services/city.service';
+import { CityService } from '../../../core/services/city.service';
 import {
   CityCreateRequest,
   CityListItem,
   CityUpdateRequest,
-} from '../../models/city.models';
+} from '../../../models/city.models';
 
 @Component({
   selector: 'app-city-management',
