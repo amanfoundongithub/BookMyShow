@@ -1,36 +1,45 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Settings(BaseSettings):
+
+    # App Environment
+    app_env: str = "local"
+
+    # Log level for the logs
+    log_level: str = "INFO"
+
+    # Service description
+    service_name: str = "api-gateway"
+    service_port: int = 8000
+
+    # JWT description
+    jwt_secret:    str = "change-me-in-local-dev"
+    jwt_algorithm: str = "HS256"
+
+    # Services to onboard on our gateway 
+    catalog_service_url: str = "http://localhost:8001"
+    booking_service_url: str = "http://localhost:8002"
+    payment_service_url: str = "http://localhost:8003"
+    user_service_url:    str = "http://localhost:8004"
+    cinema_service_url:  str = "http://localhost:8005"
+    hall_service_url:    str = "http://localhost:8006"
+    movie_service_url:   str = "http://localhost:8007"
+    city_service_url:    str = "http://localhost:8008"
+
+    # CORS Origin
+    cors_origins: list[str] = ["http://localhost:4200", "http://127.0.0.1:4200"]
+
+    # Non-Functional Parameter(s)
+    upstream_timeout_seconds: float = 10.0
+
+
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
-
-    app_env: str = "local"
-    log_level: str = "INFO"
-    service_name: str = "api-gateway"
-    service_port: int = 8000
-
-    jwt_secret: str = "change-me-in-local-dev"
-    jwt_algorithm: str = "HS256"
-
-    catalog_service_url: str = "http://localhost:8001"
-    booking_service_url: str = "http://localhost:8002"
-    payment_service_url: str = "http://localhost:8003"
-    user_service_url: str = "http://localhost:8004"
-    cinema_service_url: str = "http://localhost:8005"
-    hall_service_url: str = "http://localhost:8006"
-    movie_service_url: str = "http://localhost:8007"
-    city_service_url: str = "http://localhost:8008"
-    cors_origins: list[str] = [
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    ]
-
-    upstream_timeout_seconds: float = 10.0
 
     @property
     def booking_ws_base_url(self) -> str:
